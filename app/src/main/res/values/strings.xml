@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Guantera Sonda</string>
+
+    <string name="button_start">Iniciar</string>
+    <string name="button_stop">Detener</string>
+    <string name="button_export">Exportar</string>
+    <string name="service_status_stopped">Servicio: detenido (consulta el registro)</string>
+    <string name="service_status_running">Servicio: activo</string>
+    <string name="log_empty">Sin eventos todavía</string>
+    <string name="log_write_failed">No se está guardando el registro: %1$s</string>
+    <string name="message_unexpected_error">Error inesperado: %1$s</string>
+    <string name="message_export_running">Exportando…</string>
+    <string name="log_read_failed">No se pudo leer el registro: %1$s</string>
+
+    <string name="message_stop_requested">Servicio detenido solicitado</string>
+    <string name="message_start_failed">No se pudo iniciar: %1$s</string>
+    <string name="message_location_permission_needed">Se necesita permiso de ubicación precisa para iniciar GPS</string>
+    <string name="message_storage_permission_needed">Se necesita permiso de almacenamiento para exportar el informe</string>
+    <string name="message_export_saved">Exportado a %1$s</string>
+    <string name="message_export_failed">Falló la exportación: %1$s</string>
+
+    <string name="notification_channel_name">Guantera Sonda</string>
+    <string name="notification_title">Guantera Sonda</string>
+    <string name="notification_active">Servicio de diagnóstico activo</string>
+    <string name="notification_fix">GPS: %1$s, %2$s</string>
+
+    <string name="diagnostics_title">DIAGNÓSTICO DEL EQUIPO</string>
+    <string name="diagnostics_android">Android: %1$d (%2$s)</string>
+    <string name="diagnostics_model">Modelo: %1$s</string>
+    <string name="diagnostics_manufacturer">Fabricante: %1$s</string>
+    <string name="diagnostics_hardware">Hardware: %1$s</string>
+    <string name="diagnostics_abis">ABI: %1$s</string>
+    <string name="diagnostics_memory">Memoria: %1$s</string>
+    <string name="diagnostics_storage">Almacenamiento interno total: %1$s</string>
+    <string name="diagnostics_webview">WebView: %1$s</string>
+    <string name="diagnostics_play_services">Google Play Services: %1$s</string>
+    <string name="diagnostics_providers">Proveedores de ubicación: %1$s</string>
+    <string name="diagnostics_unavailable">No disponible</string>
+    <string name="diagnostics_not_installed">no instalado</string>
+    <string name="diagnostics_installed">instalado</string>
+    <string name="report_events_heading">===== REGISTRO =====</string>
+</resources>

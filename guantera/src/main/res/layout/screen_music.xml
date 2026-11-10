@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/screen_margin_h"
+    android:paddingTop="@dimen/screen_margin_v"
+    android:paddingEnd="@dimen/screen_margin_h"
+    android:paddingBottom="@dimen/screen_margin_v">
+
+    <app.guantera.ui.components.SectionHeaderView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:sectionLabel="@string/nav_music"
+        app:sectionNumber="@string/section_music" />
+
+    <TextView
+        style="@style/Text.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inner_gap"
+        android:text="@string/music_question" />
+
+    <app.guantera.ui.components.BannerView
+        android:id="@+id/banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/block_gap"
+        android:visibility="gone" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/trackTitle"
+        style="@style/Text.Figure"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/trackArtist"
+        style="@style/Text.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inner_gap"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/ink_secondary" />
+
+    <app.guantera.ui.components.LabelValueRowView
+        android:id="@+id/rowApp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/block_gap"
+        app:rowLabel="@string/music_app" />
+
+    <app.guantera.ui.components.LabelValueRowView
+        android:id="@+id/rowStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/row_gap"
+        app:rowLabel="@string/music_status" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/commandError"
+        style="@style/Text.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/inner_gap"
+        android:maxLines="1"
+        android:text="@string/music_command_failed"
+        android:textColor="@color/signal"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <app.guantera.ui.components.TransportControlsView
+            android:id="@+id/transport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:transportHeight="@dimen/control_large"
+            app:transportWidth="@dimen/control_large" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <app.guantera.ui.components.VolumeControlsView
+            android:id="@+id/volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:volumeHeight="@dimen/control_large"
+            app:volumeShowMute="true" />
+    </LinearLayout>
+</LinearLayout>

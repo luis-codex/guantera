@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:id="@+id/message"
+        style="@style/Text.Secondary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/button_gap_parked"
+        android:layout_weight="1"
+        android:maxLines="2"
+        android:textColor="@color/ink" />
+    <Button
+        android:id="@+id/action"
+        style="@style/Control.Button.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min" />
+</merge>

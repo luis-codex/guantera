@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_hours">%1$d h %2$02d</string>
+
+    <!-- P3 Viajes -->
+    <string name="trips_today">Hoy</string>
+    <string name="trips_week">Esta semana</string>
+    <string name="trips_month">Este mes</string>
+    <string name="trips_empty">Todavía no hay viajes. Se registran solos cuando el auto se mueve.</string>
+    <string name="trips_estimated">Cierre estimado</string>
+    <string name="trips_day_today">Hoy</string>
+    <string name="trips_day_yesterday">Ayer</string>
+    <string name="trips_km">%1$s km</string>
+    <string name="trips_see">Ver ›</string>
+    <string name="trips_row_description">Viaje, %1$s, %2$s, %3$s kilómetros</string>
+
+    <!-- P4 Detalle de viaje -->
+    <string name="trip_question">¿Cómo fue este viaje?</string>
+    <string name="trip_km">Distancia</string>
+    <string name="trip_duration">Duración</string>
+    <string name="trip_speed">Velocidad media</string>
+    <string name="trip_speed_value">%1$s km/h</string>
+    <string name="trip_no_data">Sin datos</string>
+    <string name="trip_start">Inicio</string>
+    <string name="trip_end">Fin</string>
+    <string name="trip_point">%1$s · %2$s</string>
+    <string name="trip_closure">Cierre</string>
+    <string name="trip_closure_automatic">Automático</string>
+    <string name="trip_closure_manual">Con “Ya estacioné”</string>
+    <string name="trip_estimated_explain">La radio se apagó antes de terminar el viaje. Se cerró en el último punto válido.</string>
+    <string name="trip_gps_note">Los km son una estimación por GPS.</string>
+    <string name="trip_back">Volver a Viajes</string>
+
+    <!-- P10 Estacionado -->
+    <string name="parked_empty">Todavía no hay un lugar guardado.</string>
+    <string name="parked_empty_hint">Cuando estaciones, tocá “Guardar acá ahora”.</string>
+    <string name="parked_note">Nota</string>
+    <string name="parked_no_note">Sin nota</string>
+    <string name="parked_coordinates">Coordenadas</string>
+    <string name="parked_accuracy">Precisión</string>
+    <string name="parked_accuracy_value">%1$d m</string>
+    <string name="parked_last_signal">Es el último punto con señal, antes de perder el GPS.</string>
+    <string name="parked_save_here">Guardar acá ahora</string>
+    <string name="parked_edit_note">Editar nota</string>
+    <string name="parked_add_note">Agregar nota</string>
+    <string name="parked_note_hint">Por ejemplo: piso 2, columna B</string>
+    <string name="parked_note_save">Guardar nota</string>
+    <string name="parked_note_cancel">Cancelar</string>
+    <string name="parked_qr_title">Llevalo en el celular</string>
+    <string name="parked_qr_caption">Escaneá antes de bajar. Abre el mapa con los datos de tu celular.</string>
+    <string name="parked_qr_description">Código QR con la ubicación del auto</string>
+    <string name="parked_no_fix">Sin señal de GPS. Esperá a que la barra diga “GPS con señal” y probá de nuevo.</string>
+    <string name="parked_moving">No se puede guardar con el auto en movimiento.</string>
+    <string name="stopped_question">¿El auto está estacionado?</string>
+    <string name="stopped_yes">Sí</string>
+    <string name="stopped_no">No</string>
+</resources>

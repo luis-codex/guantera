@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Un solo sistema de medidas: 4, 8, 12, 16, 24, 32, 48, 64. -->
+    <dimen name="s4">4dp</dimen>
+    <dimen name="s8">8dp</dimen>
+    <dimen name="s12">12dp</dimen>
+    <dimen name="s16">16dp</dimen>
+    <dimen name="s24">24dp</dimen>
+    <dimen name="s32">32dp</dimen>
+    <dimen name="s48">48dp</dimen>
+    <dimen name="s64">64dp</dimen>
+
+    <dimen name="line">1dp</dimen>
+    <dimen name="radius">2dp</dimen>
+    <dimen name="active_bar">4dp</dimen>
+
+    <dimen name="touch_min">96dp</dimen>
+    <dimen name="action_min_width">288dp</dimen>
+    <dimen name="touch_gap">16dp</dimen>
+    <dimen name="top_bar_height">64dp</dimen>
+    <dimen name="rail_width">216dp</dimen>
+    <dimen name="icon_transport">48dp</dimen>
+
+    <!-- Espaciado: regla única (diseno.md). Interno < entre piezas <= margen de pantalla. -->
+    <dimen name="rail_text_margin">@dimen/s16</dimen>
+    <dimen name="screen_margin_h">@dimen/s24</dimen>
+    <dimen name="screen_margin_v">@dimen/s16</dimen>
+    <dimen name="card_padding">@dimen/s16</dimen>
+    <dimen name="card_gap">@dimen/s24</dimen>
+    <dimen name="block_gap">@dimen/s24</dimen>
+    <dimen name="block_gap_large">@dimen/s32</dimen>
+    <dimen name="inner_gap">@dimen/s8</dimen>
+    <dimen name="row_gap">@dimen/s12</dimen>
+    <dimen name="banner_padding_h">@dimen/s24</dimen>
+    <dimen name="banner_padding_v">@dimen/s16</dimen>
+    <dimen name="button_padding_h">@dimen/s24</dimen>
+    <dimen name="button_padding_v">@dimen/s12</dimen>
+    <dimen name="button_gap_parked">@dimen/s16</dimen>
+    <dimen name="button_gap_driving">@dimen/s24</dimen>
+
+    <!-- Tamaños de componentes -->
+    <dimen name="control_large">112dp</dimen>
+    <dimen name="volume_value_width">120dp</dimen>
+    <dimen name="playback_status_width">152dp</dimen>
+    <dimen name="figure_row_height">152dp</dimen>
+    <dimen name="qr_size">344dp</dimen>
+    <dimen name="drive_figure_width">288dp</dimen>
+    <dimen name="drive_transport_width">168dp</dimen>
+    <dimen name="drive_control_height">136dp</dimen>
+    <dimen name="drive_volume_width">176dp</dimen>
+    <dimen name="drive_primary_width">320dp</dimen>
+    <dimen name="trip_column_day">192dp</dimen>
+    <dimen name="trip_column_time">96dp</dimen>
+    <dimen name="trip_column_duration">112dp</dimen>
+
+    <dimen name="text_label">20sp</dimen>
+    <dimen name="text_secondary">24sp</dimen>
+    <dimen name="text_primary">32sp</dimen>
+    <dimen name="text_title">44sp</dimen>
+    <dimen name="text_figure">64sp</dimen>
+    <dimen name="text_figure_drive">112sp</dimen>
+</resources>

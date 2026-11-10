@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Guantera" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/background</item>
+        <item name="colorPrimaryDark">@color/background</item>
+        <item name="colorAccent">@color/ink</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <!-- Texto -->
+    <style name="Text">
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Text.Title">
+        <item name="android:fontFamily">@font/fraunces_regular</item>
+        <item name="fontFamily">@font/fraunces_regular</item>
+        <item name="android:textSize">@dimen/text_title</item>
+    </style>
+    <style name="Text.Figure">
+        <item name="android:fontFamily">@font/fraunces_regular</item>
+        <item name="fontFamily">@font/fraunces_regular</item>
+        <item name="android:textSize">@dimen/text_figure</item>
+        <item name="android:fontFeatureSettings">"lnum"</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    <style name="Text.Headline">
+        <item name="android:fontFamily">@font/fraunces_regular</item>
+        <item name="fontFamily">@font/fraunces_regular</item>
+        <item name="android:textSize">@dimen/text_primary</item>
+    </style>
+    <style name="Text.Primary">
+        <item name="android:fontFamily">@font/space_grotesk_regular</item>
+        <item name="fontFamily">@font/space_grotesk_regular</item>
+        <item name="android:textSize">@dimen/text_primary</item>
+    </style>
+    <style name="Text.Secondary">
+        <item name="android:fontFamily">@font/space_grotesk_regular</item>
+        <item name="fontFamily">@font/space_grotesk_regular</item>
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:textColor">@color/ink_secondary</item>
+    </style>
+    <style name="Text.Label">
+        <item name="android:fontFamily">@font/space_mono_regular</item>
+        <item name="fontFamily">@font/space_mono_regular</item>
+        <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:textColor">@color/ink_faint</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <!-- Botones: sin ripple ni animación, el estado presionado cambia el color al instante. -->
+    <style name="Control">
+        <item name="android:minWidth">@dimen/touch_min</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="Control.Button">
+        <item name="android:paddingStart">@dimen/button_padding_h</item>
+        <item name="android:paddingEnd">@dimen/button_padding_h</item>
+        <item name="android:paddingTop">@dimen/button_padding_v</item>
+        <item name="android:paddingBottom">@dimen/button_padding_v</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/space_grotesk_medium</item>
+        <item name="fontFamily">@font/space_grotesk_medium</item>
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    <style name="Control.Button.Primary">
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="android:textColor">@color/background</item>
+    </style>
+    <style name="Control.Button.Secondary">
+        <item name="android:background">@drawable/bg_button_secondary</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+    <style name="Control.Transport">
+        <item name="android:scaleType">center</item>
+        <item name="android:background">@drawable/bg_button_secondary</item>
+        <item name="tint">@color/ink</item>
+    </style>
+    <style name="Control.Transport.Primary">
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="tint">@color/background</item>
+    </style>
+    <style name="Control.Rail">
+        <item name="android:minWidth">0dp</item>
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:paddingStart">@dimen/rail_text_margin</item>
+        <item name="android:paddingEnd">@dimen/rail_text_margin</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:background">@drawable/bg_rail_item</item>
+        <item name="android:textColor">@color/rail_text</item>
+        <item name="android:fontFamily">@font/space_grotesk_regular</item>
+        <item name="fontFamily">@font/space_grotesk_regular</item>
+        <item name="android:textSize">@dimen/text_secondary</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    </resources>

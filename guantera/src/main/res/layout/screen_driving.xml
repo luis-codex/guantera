@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/screen_margin_h"
+    android:paddingTop="@dimen/screen_margin_v"
+    android:paddingEnd="@dimen/screen_margin_h"
+    android:paddingBottom="@dimen/screen_margin_v">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <app.guantera.ui.components.FigureCellView
+            android:id="@+id/km"
+            android:layout_width="@dimen/drive_figure_width"
+            android:layout_height="match_parent"
+            app:cellFigureSize="@dimen/text_figure_drive"
+            app:cellLabel="@string/drive_km_label" />
+
+        <app.guantera.ui.components.FigureCellView
+            android:id="@+id/minutes"
+            android:layout_width="@dimen/drive_figure_width"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/card_gap"
+            app:cellFigureSize="@dimen/text_figure_drive"
+            app:cellLabel="@string/drive_minutes_label" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/block_gap_large"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+            <TextView
+                style="@style/Text.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/drive_alert_label" />
+            <TextView
+                android:id="@+id/alert"
+                style="@style/Text.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/inner_gap"
+                android:ellipsize="end"
+                android:maxLines="1" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line"
+                android:layout_marginTop="@dimen/block_gap"
+                android:layout_marginBottom="@dimen/block_gap"
+                android:background="@color/line" />
+            <TextView
+                style="@style/Text.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text="@string/drive_legend"
+                android:textColor="@color/ink" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/block_gap"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <app.guantera.ui.components.TransportControlsView
+            android:id="@+id/transport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:transportGap="@dimen/button_gap_driving"
+            app:transportHeight="@dimen/drive_control_height"
+            app:transportWidth="@dimen/drive_transport_width" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <app.guantera.ui.components.VolumeControlsView
+            android:id="@+id/volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:volumeHeight="@dimen/drive_control_height"
+            app:volumeWidth="@dimen/drive_volume_width" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/button_gap_driving"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/endSimulation"
+            style="@style/Control.Button.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/touch_min"
+            android:text="@string/drive_end_simulation" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/parked"
+            style="@style/Control.Button.Primary"
+            android:layout_width="@dimen/drive_primary_width"
+            android:layout_height="@dimen/touch_min"
+            android:text="@string/drive_parked"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

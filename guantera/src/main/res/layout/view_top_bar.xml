@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        style="@style/Text.Headline"
+        android:layout_width="@dimen/rail_width"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/rail_text_margin"
+        android:text="@string/app_name" />
+    <TextView
+        android:id="@+id/gps"
+        style="@style/Text.Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_margin_h" />
+    <TextView
+        android:id="@+id/motion"
+        style="@style/Text.Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/s32" />
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    <TextView
+        android:id="@+id/sampleLabel"
+        style="@style/Text.Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_cell"
+        android:paddingStart="@dimen/s12"
+        android:paddingTop="@dimen/s4"
+        android:paddingEnd="@dimen/s12"
+        android:paddingBottom="@dimen/s4"
+        android:text="@string/sample_data"
+        android:textColor="@color/ink" />
+    <TextView
+        android:id="@+id/clock"
+        style="@style/Text.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_margin_h"
+        android:layout_marginEnd="@dimen/screen_margin_h"
+        android:textColor="@color/ink" />
+</merge>

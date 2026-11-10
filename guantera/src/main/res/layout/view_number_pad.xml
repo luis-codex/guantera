@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/touch_gap"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/key1"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="@dimen/touch_gap"
+            android:background="@drawable/bg_button_secondary"
+            android:text="1" />
+        <Button
+            android:id="@+id/key2"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="@dimen/touch_gap"
+            android:background="@drawable/bg_button_secondary"
+            android:text="2" />
+        <Button
+            android:id="@+id/key3"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="0dp"
+            android:background="@drawable/bg_button_secondary"
+            android:text="3" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/touch_gap"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/key4"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="@dimen/touch_gap"
+            android:background="@drawable/bg_button_secondary"
+            android:text="4" />
+        <Button
+            android:id="@+id/key5"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="@dimen/touch_gap"
+            android:background="@drawable/bg_button_secondary"
+            android:text="5" />
+        <Button
+            android:id="@+id/key6"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="0dp"
+            android:background="@drawable/bg_button_secondary"
+            android:text="6" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/touch_gap"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/key7"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="@dimen/touch_gap"
+            android:background="@drawable/bg_button_secondary"
+            android:text="7" />
+        <Button
+            android:id="@+id/key8"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="@dimen/touch_gap"
+            android:background="@drawable/bg_button_secondary"
+            android:text="8" />
+        <Button
+            android:id="@+id/key9"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="0dp"
+            android:background="@drawable/bg_button_secondary"
+            android:text="9" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/keyBackspace"
+            style="@style/Control.Transport"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="@dimen/touch_gap"
+            android:contentDescription="@string/lg_pad_backspace"
+            android:src="@drawable/ic_backspace" />
+        <Button
+            android:id="@+id/key0"
+            style="@style/Control.Button.Pad"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:layout_marginEnd="@dimen/touch_gap"
+            android:background="@drawable/bg_button_secondary"
+            android:text="0" />
+        <Button
+            android:id="@+id/keyExtra"
+            style="@style/Control.Button.PadWord"
+            android:layout_width="@dimen/pad_key"
+            android:layout_height="@dimen/pad_key"
+            android:background="@drawable/bg_button_secondary" />
+    </LinearLayout>
+</merge>

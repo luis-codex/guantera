@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#000000</color>
+    <color name="surface">#0A0A0A</color>
+    <color name="ink">#CDC4BA</color>
+    <color name="ink_secondary">#B0A9A0</color>
+    <color name="ink_faint">#958F87</color>
+    <color name="signal">#CE5E32</color>
+    <color name="line">#42CDC4BA</color>
+    <color name="line_soft">#21CDC4BA</color>
+    <color name="line_strong">#6BCDC4BA</color>
+</resources>

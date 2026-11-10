@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <Button
+        android:id="@+id/previous"
+        style="@style/Control.Button.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:text="@string/lg_prev" />
+    <TextView
+        android:id="@+id/label"
+        style="@style/Text.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/touch_gap"
+        android:layout_marginEnd="@dimen/touch_gap"
+        android:gravity="center"
+        android:minWidth="@dimen/pager_label_width"
+        android:maxLines="1" />
+    <Button
+        android:id="@+id/next"
+        style="@style/Control.Button.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:text="@string/lg_next" />
+</merge>

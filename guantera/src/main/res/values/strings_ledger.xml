@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Comunes -->
+    <string name="lg_cancel">Cancelar</string>
+    <string name="lg_save">Guardar</string>
+    <string name="lg_prev">Anterior</string>
+    <string name="lg_next">Siguiente</string>
+    <string name="lg_page">%1$d de %2$d</string>
+    <string name="lg_yes">Sí</string>
+    <string name="lg_no">No</string>
+    <string name="lg_back">Volver</string>
+    <string name="lg_delete">Borrar</string>
+    <string name="lg_empty_value">—</string>
+    <string name="lg_unit_km">%1$s km</string>
+    <string name="lg_unit_months">%1$s meses</string>
+    <string name="lg_money">%1$s %2$s</string>
+    <string name="lg_pad_backspace">Quitar el último dígito</string>
+    <string name="lg_pad_today">Hoy</string>
+    <string name="lg_pad_comma">,</string>
+
+    <string name="lg_confirm_parked_title">¿El auto está estacionado?</string>
+    <string name="lg_confirm_parked_body">Guantera no puede saberlo sola. Los formularios se usan solo con el auto detenido.</string>
+    <string name="lg_confirm_delete_item_title">¿Borrar «%1$s»?</string>
+    <string name="lg_confirm_delete_item_body">El ítem deja de avisar. Los gastos que ya cargaste no se borran.</string>
+    <string name="lg_confirm_delete_expense_title">¿Borrar el gasto de %1$s?</string>
+    <string name="lg_confirm_delete_expense_body">No se puede deshacer. Si vino de un service, el service queda registrado.</string>
+
+    <!-- Errores de formulario: dicen qué pasó y cómo seguir -->
+    <string name="er_name">Escribí un nombre para el ítem.</string>
+    <string name="er_needs_rule">Cargá un intervalo en km, en meses o una fecha de vencimiento.</string>
+    <string name="er_invalid_date">Esa fecha no existe. Escribila con día, mes y año.</string>
+    <string name="er_future_date">La fecha no puede ser futura.</string>
+    <string name="er_km_required">Cargá los km del auto al hacer el service.</string>
+    <string name="er_new_due_required">Este ítem vence en una fecha fija: cargá el nuevo vencimiento.</string>
+    <string name="er_new_due_early">El nuevo vencimiento debe ser posterior a la fecha del service.</string>
+    <string name="er_category">Elegí una categoría.</string>
+    <string name="er_amount">Cargá el monto del gasto.</string>
+
+    <!-- P5 Mantenimiento -->
+    <string name="mt_add">Agregar ítem</string>
+    <string name="mt_done">Hecho</string>
+    <string name="mt_restore">Restaurar catálogo</string>
+    <string name="mt_empty">No hay ítems. Agregá uno o restaurá el catálogo.</string>
+    <string name="mt_all_ok">Todo al día</string>
+    <string name="mt_summary_join">%1$s · %2$s</string>
+    <plurals name="mt_overdue_count">
+        <item quantity="one">%d vencido</item>
+        <item quantity="other">%d vencidos</item>
+    </plurals>
+    <plurals name="mt_soon_count">
+        <item quantity="one">%d próximo</item>
+        <item quantity="other">%d próximos</item>
+    </plurals>
+    <string name="mt_km_over">pasado por %1$s km</string>
+    <string name="mt_km_left">faltan %1$s km</string>
+    <string name="mt_now">toca ahora</string>
+    <string name="mt_today">vence hoy</string>
+    <plurals name="mt_days_over">
+        <item quantity="one">hace %d día</item>
+        <item quantity="other">hace %d días</item>
+    </plurals>
+    <plurals name="mt_days_left">
+        <item quantity="one">vence en %d día</item>
+        <item quantity="other">vence en %d días</item>
+    </plurals>
+    <string name="mt_no_data_hint">cargá el último service</string>
+    <string name="mt_row_detail">%1$s · %2$s</string>
+    <string name="mt_row_status">%1$s, %2$s</string>
+    <string name="mt_origin_verified">Referencia verificada</string>
+    <string name="mt_origin_criterion">Criterio propio</string>
+    <string name="mt_origin_own">Dato tuyo</string>
+    <string name="mt_notice_service_saved">Service registrado.</string>
+    <string name="mt_notice_service_expense">Service registrado y gasto creado.</string>
+    <string name="mt_notice_item_saved">Ítem guardado.</string>
+    <string name="mt_notice_item_deleted">Ítem borrado.</string>
+    <string name="mt_notice_catalog_complete">El catálogo ya está completo.</string>
+    <plurals name="mt_notice_catalog_restored">
+        <item quantity="one">Se agregó %d ítem del catálogo.</item>
+        <item quantity="other">Se agregaron %d ítems del catálogo.</item>
+    </plurals>
+
+    <!-- P6 y P7 -->
+    <string name="mt_form_new_title">Nuevo ítem</string>
+    <string name="mt_form_edit_title">Editar ítem</string>
+    <string name="mt_form_hint">Manda el manual del fabricante.</string>
+    <string name="mt_delete_item">Borrar ítem</string>
+    <string name="mt_service_title">Registrar service</string>
+    <string name="mt_f_name">Nombre</string>
+    <string name="mt_f_interval_km">Cada (km)</string>
+    <string name="mt_f_interval_months">Cada (meses)</string>
+    <string name="mt_f_fixed">Vence el</string>
+    <string name="mt_f_last_km">Último service: km</string>
+    <string name="mt_f_last_date">Último service: fecha</string>
+    <string name="mt_f_service_date">Fecha</string>
+    <string name="mt_f_service_km">Km del auto</string>
+    <string name="mt_f_cost">Costo (opcional)</string>
+    <string name="mt_f_new_due">Nuevo vencimiento</string>
+    <string name="mt_f_note">Nota (opcional)</string>
+
+    <!-- P8 Gastos y P9 -->
+    <string name="ex_new">Nuevo</string>
+    <string name="ex_period_month">Este mes</string>
+    <string name="ex_period_year">12 meses</string>
+    <string name="ex_period_all">Todo</string>
+    <string name="ex_cost_per_km">Costo por km</string>
+    <string name="ex_total">Total</string>
+    <string name="ex_km">Km del período</string>
+    <string name="ex_too_few">Pocos km para calcular</string>
+    <string name="ex_empty">Sin gastos cargados.</string>
+    <string name="ex_empty_hint">Tocá Nuevo para cargar el primero.</string>
+    <string name="ex_notice_saved">Gasto guardado.</string>
+    <string name="ex_notice_deleted">Gasto borrado.</string>
+    <string name="ex_cat_fuel">Combustible</string>
+    <string name="ex_cat_maintenance">Mantenimiento</string>
+    <string name="ex_cat_insurance">Seguro</string>
+    <string name="ex_cat_tolls">Peajes</string>
+    <string name="ex_cat_parking">Estacionamiento</string>
+    <string name="ex_cat_washing">Lavado</string>
+    <string name="ex_cat_other">Otros</string>
+    <string name="ex_form_new_title">Nuevo gasto</string>
+    <string name="ex_form_edit_title">Editar gasto</string>
+    <string name="ex_form_hint">Elegí la categoría y cargá el monto.</string>
+    <string name="ex_linked_hint">Creado al registrar un service.</string>
+    <string name="ex_delete">Borrar gasto</string>
+    <string name="ex_f_amount">Monto</string>
+    <string name="ex_f_date">Fecha</string>
+    <string name="ex_f_note">Nota (opcional)</string>
+</resources>

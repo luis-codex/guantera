@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Field.Note" parent="Text.Primary">
+        <item name="android:background">@drawable/bg_cell</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:paddingStart">@dimen/card_padding</item>
+        <item name="android:paddingEnd">@dimen/card_padding</item>
+        <item name="android:textColorHint">@color/ink_faint</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+</resources>

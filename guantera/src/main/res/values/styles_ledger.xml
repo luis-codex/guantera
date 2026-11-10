@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tecla del teclado numérico: cifra grande, sin relleno lateral porque la tecla mide 96 x 96. -->
+    <style name="Control.Button.Pad">
+        <item name="android:minWidth">@dimen/pad_key</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:fontFamily">@font/fraunces_regular</item>
+        <item name="fontFamily">@font/fraunces_regular</item>
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:fontFeatureSettings">"lnum"</item>
+    </style>
+    <style name="Control.Button.PadWord">
+        <item name="android:minWidth">@dimen/pad_key</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+    <!-- Opción de una lista corta (categoría, período): el elegido lleva borde, relleno y letra más gruesa. -->
+    <style name="Control.Button.Choice">
+        <item name="android:background">@drawable/bg_choice</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:paddingStart">@dimen/s8</item>
+        <item name="android:paddingEnd">@dimen/s8</item>
+    </style>
+    <style name="Text.FieldValue" parent="Text.Primary">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+</resources>

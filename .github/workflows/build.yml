@@ -1,0 +1,36 @@
+name: APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Probar y compilar
+        run: ./gradlew test :guantera:assembleDebug :app:assembleDebug --console=plain
+      - name: Publicar APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete apk --cleanup-tag --yes || true
+          gh release create apk dist/guantera-debug.apk dist/guantera-sonda-debug.apk \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "Última compilación" \
+            --notes "Compilado de ${GITHUB_SHA::7}. guantera-debug.apk: interfaz con datos de ejemplo, todavía no registra datos reales. guantera-sonda-debug.apk: prueba de diagnóstico para la radio."

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mantenimiento, Gastos y el teclado numérico. Solo valores de la escala. -->
+    <dimen name="field_stroke_active">2dp</dimen>
+    <dimen name="pad_key">96dp</dimen>
+    <dimen name="pad_width">320dp</dimen>
+    <dimen name="confirm_panel_width">640dp</dimen>
+    <dimen name="expenses_side_width">480dp</dimen>
+    <dimen name="pager_label_width">96dp</dimen>
+</resources>

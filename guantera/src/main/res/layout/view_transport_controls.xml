@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageButton
+        android:id="@+id/previous"
+        style="@style/Control.Transport"
+        android:layout_width="@dimen/touch_min"
+        android:layout_height="@dimen/touch_min"
+        android:contentDescription="@string/transport_previous"
+        android:src="@drawable/ic_previous" />
+    <ImageButton
+        android:id="@+id/playPause"
+        style="@style/Control.Transport.Primary"
+        android:layout_width="@dimen/touch_min"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/touch_gap"
+        android:contentDescription="@string/transport_play"
+        android:src="@drawable/ic_play" />
+    <ImageButton
+        android:id="@+id/next"
+        style="@style/Control.Transport"
+        android:layout_width="@dimen/touch_min"
+        android:layout_height="@dimen/touch_min"
+        android:layout_marginStart="@dimen/touch_gap"
+        android:contentDescription="@string/transport_next"
+        android:src="@drawable/ic_next" />
+</merge>

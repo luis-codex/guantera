@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <layer-list>
+            <item><shape><solid android:color="@color/surface" /></shape></item>
+            <item android:gravity="start|fill_vertical" android:width="@dimen/active_bar">
+                <shape><solid android:color="@color/signal" /></shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_pressed="true">
+        <shape><solid android:color="@color/line_soft" /></shape>
+    </item>
+    <item><shape><solid android:color="@android:color/transparent" /></shape></item>
+</selector>

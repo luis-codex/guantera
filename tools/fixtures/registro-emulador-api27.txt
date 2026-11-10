@@ -1,0 +1,37 @@
+DIAGNÓSTICO DEL EQUIPO
+Android: 27 (8.1.0)
+Modelo: Android SDK built for x86
+Fabricante: Google
+Hardware: ranchu
+ABI: x86
+Memoria: 2,046,712 kB
+Almacenamiento interno total: 5,951 MB
+WebView: com.android.chrome 69.0.3497.100
+Google Play Services: 20.24.14 (040700-319035315)
+Proveedores de ubicación: passive, gps, network
+
+===== REGISTRO =====
+2026-11-09 19:39:07.593 | Arranque de proceso
+2026-11-09 19:39:07.606 | Arranque de app
+2026-11-09 19:39:07.629 | Activity visible
+2026-11-09 19:39:10.614 | Iniciar solicitado
+2026-11-09 19:39:10.615 | service create
+2026-11-09 19:39:10.618 | GPS listener iniciado; proveedor activo=true
+2026-11-09 19:39:10.639 | Primer fix GPS
+2026-11-09 19:39:10.639 | Fix GPS lat=37.421998333333335, lon=-122.08400000000002, velocidad=0.0 m/s, precisión=20.0 m, satélites usados=0
+2026-11-09 19:39:16.372 | Broadcast android.intent.action.SCREEN_ON
+2026-11-09 19:39:16.377 | Broadcast android.intent.action.SCREEN_OFF
+2026-11-09 19:39:17.827 | Activity visible
+2026-11-09 19:39:17.849 | Broadcast android.intent.action.SCREEN_ON
+2026-11-09 19:39:19.859 | Broadcast com.qf.action.ACC_OFF: source=1
+2026-11-09 19:39:20.893 | Broadcast com.qf.action.ACC_ON: source=1
+2026-11-09 19:39:21.924 | Broadcast com.qf.action.READY_GO_SLEEP_PRE: source=1
+2026-11-09 19:39:22.958 | Broadcast android.intent.action.ACC_OFF: source=1
+2026-11-09 19:39:23.983 | Broadcast android.intent.action.ACC_ON: source=1
+2026-11-09 19:39:24.998 | Broadcast android.intent.action.ACTION_POWER_DISCONNECTED: seq=4
+2026-11-09 19:39:26.006 | Broadcast android.intent.action.ACTION_POWER_CONNECTED: seq=5
+2026-11-09 19:39:41.051 | Fix GPS lat=-34.6, lon=-58.38, velocidad=sin velocidad, precisión=20.0 m, satélites usados=0
+2026-11-09 19:40:11.056 | Fix GPS lat=-34.60999833333334, lon=-58.38999999999999, velocidad=0.0 m/s, precisión=20.0 m, satélites usados=0
+2026-11-09 19:40:41.061 | Fix GPS lat=-34.619998333333335, lon=-58.39999833333333, velocidad=sin velocidad, precisión=20.0 m, satélites usados=0
+2026-11-09 19:41:08.796 | Detener solicitado
+2026-11-09 19:41:08.798 | service destroy

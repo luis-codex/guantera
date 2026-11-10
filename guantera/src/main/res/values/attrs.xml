@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SectionHeaderView">
+        <attr name="sectionNumber" format="string" />
+        <attr name="sectionLabel" format="string" />
+    </declare-styleable>
+    <declare-styleable name="LabelValueRowView">
+        <attr name="rowLabel" format="string" />
+    </declare-styleable>
+    <declare-styleable name="FigureCellView">
+        <attr name="cellLabel" format="string" />
+        <attr name="cellFigureSize" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="ListRowView">
+        <attr name="listTitle" format="string" />
+        <attr name="listSubtitle" format="string" />
+        <attr name="listAction" format="string" />
+    </declare-styleable>
+    <declare-styleable name="TransportControlsView">
+        <attr name="transportWidth" format="dimension" />
+        <attr name="transportHeight" format="dimension" />
+        <attr name="transportGap" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="VolumeControlsView">
+        <attr name="volumeWidth" format="dimension" />
+        <attr name="volumeHeight" format="dimension" />
+        <attr name="volumeShowMute" format="boolean" />
+    </declare-styleable>
+</resources>

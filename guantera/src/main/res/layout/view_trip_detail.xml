@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/screen_margin_v">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inner_gap"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+        <TextView
+            style="@style/Text.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/trip_question" />
+        <TextView
+            android:id="@+id/date"
+            style="@style/Text.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:maxLines="1"
+            android:textColor="@color/ink" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/figure_row_height"
+        android:layout_marginTop="@dimen/block_gap"
+        android:orientation="horizontal">
+        <app.guantera.ui.components.FigureCellView
+            android:id="@+id/km"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellLabel="@string/trip_km" />
+        <app.guantera.ui.components.FigureCellView
+            android:id="@+id/duration"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/card_gap"
+            android:layout_weight="1"
+            app:cellLabel="@string/trip_duration" />
+        <app.guantera.ui.components.FigureCellView
+            android:id="@+id/speed"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/card_gap"
+            android:layout_weight="1"
+            app:cellLabel="@string/trip_speed" />
+    </LinearLayout>
+
+    <app.guantera.ui.components.LabelValueRowView
+        android:id="@+id/rowStart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/block_gap"
+        app:rowLabel="@string/trip_start" />
+
+    <app.guantera.ui.components.LabelValueRowView
+        android:id="@+id/rowEnd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/row_gap"
+        app:rowLabel="@string/trip_end" />
+
+    <app.guantera.ui.components.LabelValueRowView
+        android:id="@+id/rowClosure"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/row_gap"
+        app:rowLabel="@string/trip_closure" />
+
+    <TextView
+        android:id="@+id/note"
+        style="@style/Text.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/row_gap"
+        android:maxLines="2" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/back"
+        style="@style/Control.Button.Primary"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/touch_min"
+        android:text="@string/trip_back" />
+</LinearLayout>

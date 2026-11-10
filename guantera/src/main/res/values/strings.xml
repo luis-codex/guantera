@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Guantera</string>
+
+    <!-- Barra superior -->
+    <string name="sample_data">Datos de ejemplo</string>
+    <string name="gps_good">GPS con señal</string>
+    <string name="gps_searching">Buscando GPS</string>
+    <string name="gps_off">GPS apagado</string>
+    <string name="gps_no_permission">GPS sin permiso</string>
+    <string name="motion_stopped">Detenido</string>
+    <string name="motion_moving">En movimiento</string>
+    <string name="motion_unknown">Movimiento sin confirmar</string>
+
+    <!-- Riel -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_trips">Viajes</string>
+    <string name="nav_maintenance">Mantenimiento</string>
+    <string name="nav_expenses">Gastos</string>
+    <string name="nav_music">Música</string>
+    <string name="nav_parked">Estacionado</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="nav_current">%1$s, pantalla actual</string>
+
+    <!-- Numeración de secciones -->
+    <string name="section_home">01</string>
+    <string name="section_trips">02</string>
+    <string name="section_maintenance">03</string>
+    <string name="section_expenses">04</string>
+    <string name="section_music">05</string>
+    <string name="section_parked">06</string>
+    <string name="section_settings">07</string>
+    <string name="section_format">%1$s — %2$s</string>
+
+    <!-- Inicio -->
+    <string name="home_question">¿Está todo bien?</string>
+    <string name="home_verdict_ok">Sí, todo bien</string>
+    <string name="home_verdict_overdue">Hay un service vencido</string>
+    <string name="home_verdict_soon">Hay un service próximo</string>
+    <string name="home_verdict_notice">Hay un aviso para ver</string>
+    <string name="home_today">Hoy</string>
+    <string name="home_maintenance">Mantenimiento</string>
+    <string name="home_parked">Estacionado</string>
+    <string name="home_km_value">%1$s km</string>
+    <plurals name="home_trips">
+        <item quantity="one">%d viaje</item>
+        <item quantity="other">%d viajes</item>
+    </plurals>
+    <string name="home_all_up_to_date">Todo al día</string>
+    <string name="home_no_pending">No hay nada para hacer</string>
+    <string name="home_parked_empty">Sin lugar guardado</string>
+    <string name="home_see_trips">Ver viajes ›</string>
+    <string name="home_see_maintenance">Ver mantenimiento ›</string>
+    <string name="home_see_parked">Ver lugar ›</string>
+
+    <string name="age_now">Recién</string>
+    <string name="age_minutes">Hace %1$d min</string>
+    <string name="age_hours">Hace %1$d h %2$d min</string>
+    <plurals name="age_days">
+        <item quantity="one">Hace %d día</item>
+        <item quantity="other">Hace %d días</item>
+    </plurals>
+
+    <!-- Estados de mantenimiento: siempre con texto -->
+    <string name="maintenance_overdue">Vencido</string>
+    <string name="maintenance_soon">Próximo</string>
+    <string name="maintenance_ok">Al día</string>
+    <string name="maintenance_no_data">Sin datos</string>
+    <string name="remaining_overdue_km">hace %1$s km</string>
+    <string name="remaining_overdue_days">venció hace %1$d días</string>
+    <string name="remaining_km">faltan %1$s km</string>
+    <string name="remaining_days">vence en %1$d días</string>
+    <string name="maintenance_line">%1$s: %2$s</string>
+    <string name="maintenance_detail">%1$s · %2$s</string>
+
+    <!-- Avisos -->
+    <string name="notice_no_permission">Sin permiso de ubicación. No se registran viajes.</string>
+    <string name="notice_gps_off">GPS apagado. No se registran viajes.</string>
+    <string name="notice_clock">La hora de la radio parece mal. Avisos por fecha en pausa.</string>
+    <string name="notice_searching">Buscando GPS…</string>
+    <string name="notice_odometer">Cargá el odómetro para avisos por km.</string>
+    <string name="notice_gap">Hubo un período sin registro. Los km pueden faltar.</string>
+    <string name="notice_storage">Sin espacio en la radio. El viaje puede perderse.</string>
+    <string name="notice_export">Hace mucho que no exportás tus datos.</string>
+    <string name="notice_action_settings">Abrir Ajustes</string>
+    <string name="notice_action_location">Abrir ubicación</string>
+    <string name="notice_action_failed">Este equipo no permite abrir ese ajuste desde Guantera.</string>
+
+    <!-- Música -->
+    <string name="music_question">¿Qué está sonando?</string>
+    <string name="music_app">App</string>
+    <string name="music_status">Estado</string>
+    <string name="music_nothing_title">No suena nada</string>
+    <string name="music_nothing_subtitle">Abrí tu app de música para empezar</string>
+    <string name="music_unknown_title">Música en reproducción</string>
+    <string name="music_unknown_artist">Artista sin datos</string>
+    <string name="music_no_data">Sin datos</string>
+    <string name="music_controls_active">Controles activos</string>
+    <string name="music_open_to_see">Mirá Música para saber qué suena</string>
+    <string name="music_access_needed">Controles activos. Para ver qué suena, habilitá el acceso a notificaciones</string>
+    <string name="music_access_action">Habilitar acceso</string>
+    <string name="music_command_failed">No se pudo enviar la orden. Abrí tu app de música y probá de nuevo.</string>
+    <string name="music_no_response">Sin respuesta</string>
+    <string name="status_playing">Sonando</string>
+    <string name="status_paused">En pausa</string>
+    <string name="status_stopped">Detenido</string>
+    <string name="status_buffering">Cargando</string>
+    <string name="status_unknown">Sin datos</string>
+
+    <string name="transport_previous">Anterior</string>
+    <string name="transport_play">Reproducir</string>
+    <string name="transport_pause">Pausar</string>
+    <string name="transport_next">Siguiente</string>
+    <string name="volume_label">Volumen</string>
+    <string name="volume_down">− Bajar</string>
+    <string name="volume_up">+ Subir</string>
+    <string name="volume_mute">Silenciar</string>
+    <string name="volume_unmute">Activar sonido</string>
+    <string name="volume_percent">%1$d %%</string>
+    <string name="volume_muted">Mudo</string>
+    <string name="volume_unknown">Sin datos</string>
+
+    <!-- Conducción -->
+    <string name="drive_km_label">Km del viaje</string>
+    <string name="drive_minutes_label">Minutos</string>
+    <string name="drive_alert_label">Aviso</string>
+    <string name="drive_no_alert">Sin avisos</string>
+    <string name="drive_legend">Detené el auto para usar Guantera</string>
+    <string name="drive_parked">Ya estacioné</string>
+    <string name="drive_end_simulation">Terminar simulación</string>
+
+    <!-- Pantallas en preparación -->
+    <string name="pending_message">Esta pantalla todavía no está lista. Mientras tanto, volvé a Inicio.</string>
+    <string name="pending_action">Volver a Inicio</string>
+    <string name="trips_question">¿Cuánto anduve?</string>
+    <string name="maintenance_question">¿Qué toca hacer?</string>
+    <string name="expenses_question">¿Cuánto me sale?</string>
+    <string name="parked_question">¿Dónde quedó?</string>
+    <string name="settings_question">¿Cómo está configurada Guantera?</string>
+
+    <!-- Ajustes -->
+    <string name="settings_car">Auto</string>
+    <string name="settings_odometer">Odómetro</string>
+    <string name="settings_odometer_value">%1$s km</string>
+    <string name="settings_currency">Moneda</string>
+
+    <string name="settings_model">Modelo</string>
+    <string name="settings_group_car">Vehículo</string>
+    <string name="settings_group_gps">Ubicación</string>
+    <string name="settings_group_datetime">Fecha y hora</string>
+    <string name="settings_time_title">Hora automática</string>
+    <string name="settings_time_on">Activada. La radio pone la hora sola cuando tiene internet.</string>
+    <string name="settings_time_off">Desactivada. Activala para que la radio ponga la hora sola cuando tenga internet</string>
+    <string name="settings_time_action">Abrir ajustes de hora</string>
+    <string name="settings_time_unavailable">No disponible en esta radio</string>
+    <string name="settings_timezone">Zona horaria</string>
+    <string name="settings_timezone_auto">%1$s, automática</string>
+    <string name="settings_group_boot">Arranque</string>
+    <string name="settings_group_data">Datos guardados</string>
+    <string name="settings_odometer_title">Odómetro</string>
+    <string name="settings_odometer_sub">%1$s km. %2$s</string>
+    <string name="settings_odometer_action">Corregir odómetro</string>
+    <string name="settings_calibrated_today">Calibrado hoy.</string>
+    <string name="settings_calibrated_days">Calibrado hace %1$d días.</string>
+    <string name="settings_calibrated_day">Calibrado ayer.</string>
+    <string name="settings_calibrated_never">Nunca se calibró.</string>
+    <string name="settings_currency_title">Moneda</string>
+    <string name="settings_currency_sub">Los gastos se muestran con %1$s</string>
+    <string name="settings_currency_action">Cambiar moneda</string>
+    <string name="settings_gps_title">GPS</string>
+    <string name="settings_gps_good">Buena señal. Permiso de ubicación concedido.</string>
+    <string name="settings_gps_searching">Buscando señal. Permiso de ubicación concedido.</string>
+    <string name="settings_gps_off">GPS apagado en la radio. No se registran viajes.</string>
+    <string name="settings_gps_no_permission">Sin permiso de ubicación. No se registran viajes.</string>
+    <string name="settings_gps_grant">Conceder permiso</string>
+    <string name="settings_gps_open_failed">Este equipo no permite abrir ese ajuste desde Guantera.</string>
+    <string name="settings_boot_title">Abrir Guantera al arrancar</string>
+    <string name="settings_boot_off">Apagado. Guantera no se abre sola.</string>
+    <string name="settings_boot_on">Encendido. Se abre una vez por arranque, si el auto no está en movimiento.</string>
+    <string name="settings_boot_enable">Activar</string>
+    <string name="settings_boot_disable">Desactivar</string>
+    <string name="settings_catalog_title">Catálogo de mantenimiento</string>
+    <string name="settings_catalog_sub">Vuelve a la lista original de ítems. Tus registros no se borran.</string>
+    <string name="settings_catalog_done">Catálogo restaurado %1$s.</string>
+    <string name="settings_catalog_action">Restaurar catálogo</string>
+    <string name="settings_last_backup">Última copia</string>
+    <string name="settings_last_export">Última exportación</string>
+    <string name="settings_never">Nunca</string>
+    <string name="age_today">Hoy</string>
+    <string name="age_yesterday">Ayer</string>
+    <string name="age_days">Hace %1$d días</string>
+    <string name="age_today_lower">hoy</string>
+    <string name="settings_export_title">Exportar a pendrive</string>
+    <string name="settings_import_title">Importar desde pendrive</string>
+    <string name="settings_export_action">Exportar</string>
+    <string name="settings_import_action">Importar</string>
+    <string name="settings_not_yet">Disponible cuando Guantera registre datos reales</string>
+    <string name="settings_music_title">Música</string>
+    <string name="settings_music_sample">De ejemplo</string>
+    <string name="settings_music_real">Real</string>
+    <string name="settings_music_sample_sub">De ejemplo: no suena nada de verdad.</string>
+    <string name="settings_music_real_sub">Real: controla lo que suena en la radio.</string>
+    <string name="prompt_cancel">Cancelar</string>
+    <string name="prompt_odometer_title">Corregir odómetro</string>
+    <string name="prompt_odometer_message">Escribí los km que marca el tablero del auto.</string>
+    <string name="prompt_odometer_save">Guardar</string>
+    <string name="prompt_odometer_invalid">Escribí solo números, por ejemplo 48250.</string>
+    <string name="prompt_catalog_title">¿Restaurar el catálogo?</string>
+    <string name="prompt_catalog_message">Los ítems de mantenimiento vuelven a la lista original. Tus registros se conservan.</string>
+    <string name="prompt_catalog_accept">Sí, restaurar</string>
+    <string name="prompt_stopped_title">¿El auto está estacionado?</string>
+    <string name="prompt_stopped_message">No se sabe si el auto se mueve. Confirmá que está detenido para cambiar valores.</string>
+    <string name="prompt_stopped_yes">Sí, está estacionado</string>
+    <string name="prompt_stopped_no">No</string>
+    <string name="demo_section">Demostración</string>
+    <string name="demo_title">Modo conducción</string>
+    <string name="demo_subtitle">Muestra lo que ves mientras manejás, con datos de ejemplo.</string>
+    <string name="demo_action">Simular viaje</string>
+</resources>
