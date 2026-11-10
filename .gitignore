@@ -6,3 +6,4 @@ local.properties
 local.properties
 dist/*.apk
 __pycache__/
+dist/capturas/

@@ -20,8 +20,15 @@ interface MediaPlayerControl {
     /** Re-reads sessions, capabilities and volume now (e.g. after returning from system settings). */
     fun refresh()
 
-    fun send(command: MediaCommand): ControlResult
-    fun adjustVolume(command: VolumeCommand): ControlResult
+    /**
+     * Sends a command and checks whether it had an effect, trying the next route when it did not.
+     * Suspends for up to a second or two while it waits for the effect; safe to call from the main thread.
+     */
+    suspend fun send(command: MediaCommand): ControlResult
+    suspend fun adjustVolume(command: VolumeCommand): ControlResult
+
+    /** Per control, the last route tried and whether it had an effect. Always has every [ControlKind]. */
+    val diagnostics: StateFlow<List<ControlDiagnostic>>
 }
 
 enum class MediaCommand { PlayPause, Next, Previous }
@@ -67,7 +74,7 @@ data class MediaSnapshot(
     val nowPlaying: NowPlaying?,
     val playback: PlaybackState,
     val capabilities: MediaCapabilities,
-    /** Null when the volume could not be read. */
+    /** Null when the volume is unknown: unreadable, or the system value stopped following the radio's real volume. */
     val volume: VolumeState?,
 ) {
     companion object {
@@ -85,10 +92,44 @@ data class MediaSnapshot(
     }
 }
 
-enum class ControlChannel { Session, MediaKey, Volume }
+/** Every control the UI offers, one row each in the diagnostics. */
+enum class ControlKind { PlayPause, Previous, Next, VolumeDown, VolumeUp, Mute }
+
+/** A way of delivering a command. The diagnostics shows which one the radio finally accepted. */
+enum class ControlRoute {
+    Transport, KeyPlayPause, KeyPlay, KeyPause, KeyHeadsetHook, KeyNext, KeyPrevious,
+    StreamVolume, SuggestedVolume, SessionVolume, KeyVolume,
+}
+
+enum class Effect {
+    /** The state was read again and it changed. */
+    Confirmed,
+
+    /** The command went out and the state did not change. */
+    NoEffect,
+
+    /** The command went out but there is nothing to compare against (e.g. no session to read the track from). */
+    Unverifiable,
+}
+
+data class ControlDiagnostic(
+    val control: ControlKind,
+    /** Last route tried; null when this control was never used. */
+    val route: ControlRoute?,
+    val effect: Effect?,
+    /** Routes tried by the last use, in order. */
+    val tried: List<ControlRoute>,
+) {
+    companion object {
+        val Initial: List<ControlDiagnostic> = ControlKind.entries.map { ControlDiagnostic(it, null, null, emptyList()) }
+    }
+}
 
 enum class ControlFailure {
-    /** No channel accepted the command (session threw or absent, and keys failed). */
+    /** Every route was tried and the state never changed. */
+    NoEffect,
+
+    /** No route could even deliver the command (all threw or were absent). */
     NoChannelAvailable,
 
     /** The system rejected the call (permission, do-not-disturb policy, ...). */
@@ -99,7 +140,7 @@ enum class ControlFailure {
 }
 
 sealed interface ControlResult {
-    /** [via] is the channel that handled it; [degraded] is true when a better channel failed first. */
-    data class Done(val via: ControlChannel, val degraded: Boolean = false) : ControlResult
-    data class Failed(val reason: ControlFailure) : ControlResult
+    /** [effect] is [Effect.Confirmed] or [Effect.Unverifiable]; [route] is the one that worked or went out last. */
+    data class Done(val control: ControlKind, val route: ControlRoute, val effect: Effect) : ControlResult
+    data class Failed(val control: ControlKind, val reason: ControlFailure) : ControlResult
 }

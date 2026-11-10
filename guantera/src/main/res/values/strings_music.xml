@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="music_access_hint">Para ver qué suena, habilitá el acceso a notificaciones</string>
+    <string name="music_volume_down">Bajar</string>
+    <string name="music_volume_up">Subir</string>
+</resources>

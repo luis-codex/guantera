@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lucide "disc-3" (ISC), ver assets/licencias/Lucide-ISC.txt -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/icon_size"
+    android:height="@dimen/icon_size"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M 2 12 a 10 10 0 1 0 20 0 a 10 10 0 1 0 -20 0"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M 6 12 c 0 -1.7 0.7 -3.2 1.8 -4.2"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M 10 12 a 2 2 0 1 0 4 0 a 2 2 0 1 0 -4 0"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M 18 12 c 0 1.7 -0.7 3.2 -1.8 4.2"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

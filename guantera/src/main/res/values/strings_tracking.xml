@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tracking_notification_channel_name">Servicio de GPS</string>
+    <string name="tracking_notification_channel_desc">Seguimiento de viajes y alertas en segundo plano</string>
+    <string name="tracking_notification_active_text">Guantera activa · Registrando viajes</string>
+    <string name="tracking_status_overdue">Vencido</string>
+    <string name="tracking_status_soon">Próximo</string>
+    <string name="tracking_notification_recovery_text">Sin registro de viajes: abrí Guantera para resolver un problema con los datos.</string>
+</resources>

@@ -37,6 +37,8 @@ class FormGate(
     private val status: StateFlow<VehicleStatus>,
     private val clock: Clock,
     scope: CoroutineScope,
+    /** Tells the domain too (CU-04), which is the one that decides when a write goes through. */
+    private val onConfirmed: () -> Unit = {},
 ) {
     private var confirmedAt: Long? = null
 
@@ -52,6 +54,7 @@ class FormGate(
 
     fun confirm() {
         confirmedAt = clock.elapsedRealtimeMillis()
+        onConfirmed()
     }
 
     private companion object {
@@ -84,6 +87,12 @@ class LedgerFormat(private val display: DisplayFormat) {
 enum class FormError {
     NameRequired, NeedsRule, InvalidDate, FutureDate, KmRequired, NewDueRequired, NewDueTooEarly,
     CategoryRequired, AmountRequired,
+
+    /** Nothing was written (disk error or refused). The form keeps what was typed; saving again retries. */
+    SaveFailed, SaveFull,
+
+    /** The car started moving while the form was open. */
+    CarMoving,
 }
 
 /**

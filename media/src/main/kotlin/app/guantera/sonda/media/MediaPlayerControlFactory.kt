@@ -14,6 +14,7 @@ object MediaPlayerControlFactory {
             sessions = AndroidSessionSource(app),
             keys = AudioKeyDispatcher(app),
             volume = AudioVolumeBackend(app),
+            audio = AudioActivityProbe(app),
         )
     }
 

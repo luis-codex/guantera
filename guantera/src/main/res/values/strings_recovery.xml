@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mensajes de exportar e importar: los usan Ajustes, el primer uso y la recuperación. -->
+    <string name="rp_ok">Entendido</string>
+    <string name="rp_working">Trabajando…</string>
+    <string name="rp_retry">Reintentar</string>
+    <string name="rp_close">Cerrar</string>
+    <string name="rp_car_moving">El auto se está moviendo. Detenelo para cambiar datos.</string>
+    <string name="rp_export_title">Exportar a pendrive</string>
+    <string name="rp_export_done">La copia quedó en el pendrive y se verificó.</string>
+    <string name="rp_export_car_moving">El auto se está moviendo. Detenelo para exportar.</string>
+    <string name="rp_export_drive_missing">No hay pendrive en la radio. Conectalo y probá de nuevo.</string>
+    <string name="rp_export_drive_full">El pendrive no tiene espacio. Liberá espacio o usá otro.</string>
+    <string name="rp_export_failed">No se pudo exportar. Probá de nuevo.</string>
+    <string name="rp_import_title">Importar desde pendrive</string>
+    <string name="rp_import_done">Se importaron %1$s datos.</string>
+    <string name="rp_import_car_moving">El auto se está moviendo. Detenelo para importar.</string>
+    <string name="rp_import_drive_missing">No hay pendrive en la radio. Conectalo y probá de nuevo.</string>
+    <string name="rp_import_no_copy">El pendrive no tiene copias de Guantera.</string>
+    <string name="rp_import_unreadable">No se pudo leer la copia del pendrive. Los datos de la radio no se tocaron.</string>
+    <string name="rp_import_damaged">La copia del pendrive está dañada. Los datos de la radio no se tocaron.</string>
+    <string name="rp_import_newer">La copia es de una versión más nueva de Guantera. Actualizá la app para importarla.</string>
+    <string name="rp_import_safety_failed">No se pudo guardar una copia de lo actual antes de reemplazarlo. No se cambió nada.</string>
+    <string name="rp_import_storage_failed">No se pudo importar. Los datos de la radio no se cambiaron.</string>
+    <string name="rp_confirm_import_title">¿Importar desde el pendrive?</string>
+    <string name="rp_confirm_import_message">Los datos de la radio se reemplazan por los de la copia más nueva del pendrive. Antes se guarda una copia de lo actual.</string>
+    <string name="rp_confirm_import_yes">Sí, importar</string>
+
+    <!-- P11: filas de copias -->
+    <string name="settings_export_sub">Guarda una copia en el pendrive y la verifica.</string>
+    <string name="settings_import_sub">Reemplaza los datos por la copia más nueva del pendrive.</string>
+    <string name="settings_odometer_none">Sin cargar. Los avisos por km quedan sin datos.</string>
+    <string name="settings_save_failed_full">Sin espacio en la radio. No se pudo guardar.</string>
+
+    <!-- P0: primer uso -->
+    <string name="fu_kicker">Primer uso</string>
+    <string name="fu_location_title">Registro de viajes</string>
+    <string name="fu_location_message">Guantera usa el GPS para registrar tus viajes solos. Sin el permiso de ubicación no se guarda ningún viaje. El permiso de archivos es para las copias de seguridad.</string>
+    <string name="fu_location_granted">El permiso de ubicación está concedido.</string>
+    <string name="fu_gps_off">El GPS está apagado. No se registran viajes hasta encenderlo.</string>
+    <string name="fu_grant">Conceder permiso</string>
+    <string name="fu_open_location">Abrir ajustes de ubicación</string>
+    <string name="fu_skip">Saltear</string>
+    <string name="fu_next">Seguir</string>
+    <string name="fu_import">Importar desde pendrive</string>
+    <string name="fu_odometer_title">Odómetro</string>
+    <string name="fu_odometer_message">Escribí los km que marca el tablero. Sin este dato los avisos por km quedan sin datos; los viajes se registran igual.</string>
+    <string name="fu_save">Guardar</string>
+    <string name="fu_currency_title">Moneda</string>
+    <string name="fu_currency_message">Escribí el símbolo de tu moneda, por ejemplo $. También se carga el catálogo de mantenimiento.</string>
+    <string name="fu_footer">Los intervalos son orientativos. Manda el manual de tu auto.</string>
+    <string name="fu_back">Volver</string>
+
+    <!-- P12: recuperación -->
+    <string name="rc_kicker">Recuperación</string>
+    <string name="rc_title_no_copy">Los datos estaban dañados y no hay copia válida</string>
+    <string name="rc_message_no_copy">El archivo dañado se apartó, no se borró. Podés importar una copia desde el pendrive o empezar de cero.</string>
+    <string name="rc_title_not_moved">Los datos están dañados</string>
+    <string name="rc_message_not_moved">No se pudo apartar el archivo dañado. Probá importar desde el pendrive o exportar lo que se pueda.</string>
+    <string name="rc_title_migration">Falló la actualización de los datos</string>
+    <string name="rc_message_migration">Tus datos siguen guardados sin cambios. Podés restaurar una copia o empezar de cero; en los dos casos los datos actuales se apartan.</string>
+    <string name="rc_title_crashes">Guantera se cerró 3 veces seguidas al abrir</string>
+    <string name="rc_message_crashes">Tus datos siguen guardados. Podés restaurar una copia o empezar de cero; en los dos casos los datos actuales se apartan.</string>
+    <string name="rc_title_restore_failed">No se pudo restaurar la copia</string>
+    <string name="rc_message_restore_failed">Los datos dañados se apartaron, no se borraron. Probá con otra copia, con el pendrive o empezá de cero.</string>
+    <string name="rc_title_check_failed">No se pudieron revisar los datos</string>
+    <string name="rc_message_check_failed">Probá importar desde el pendrive, exportar lo que se pueda o empezar de cero.</string>
+    <string name="rc_copies">Copias en la radio</string>
+    <string name="rc_no_copies">No hay copias guardadas en la radio.</string>
+    <string name="rc_restore_copy">Restaurar copia del %1$s · %2$s datos</string>
+    <string name="rc_import">Importar desde pendrive</string>
+    <string name="rc_export">Exportar lo que se pueda</string>
+    <string name="rc_fresh">Empezar de cero</string>
+    <string name="rc_fresh_confirm_title">¿Empezar de cero?</string>
+    <string name="rc_fresh_confirm_message">Guantera arranca sin datos. Los datos anteriores se apartan en la radio, no se borran.</string>
+    <string name="rc_fresh_confirm_yes">Sí, empezar de cero</string>
+    <string name="rc_fresh_failed">No se pudieron apartar los datos anteriores. No se cambió nada.</string>
+    <string name="rc_restored_title">Se restauró tu copia</string>
+    <string name="rc_restored_message">Los datos estaban dañados. Se apartó el archivo y se recuperaron %2$s datos de la copia del %1$s. Lo posterior a esa copia se perdió.</string>
+    <string name="rc_restore_unreadable">No se pudo leer esa copia.</string>
+    <string name="rc_restore_damaged">Esa copia está dañada y se apartó.</string>
+    <string name="rc_restore_newer">Esa copia es de una versión más nueva de Guantera.</string>
+    <string name="rc_restore_failed">No se pudo restaurar. Probá de nuevo.</string>
+</resources>

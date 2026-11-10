@@ -26,4 +26,8 @@
         <attr name="volumeHeight" format="dimension" />
         <attr name="volumeShowMute" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="HistoryBodyView">
+        <attr name="historyEmpty" format="string" />
+        <attr name="historyEmptyHint" format="string" />
+    </declare-styleable>
 </resources>

@@ -129,65 +129,47 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/s16" />
-                <LinearLayout
-                    android:id="@+id/demoSection"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
         <app.guantera.ui.components.SectionHeaderView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/s32"
-            app:sectionLabel="@string/demo_section" />
-        <app.guantera.ui.components.ListRowView
-            android:id="@+id/demoRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/s16" />
-        <LinearLayout
+            app:sectionLabel="@string/settings_group_music" />
+        <app.guantera.ui.components.LabelValueRowView
+            android:id="@+id/musicRowPlay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/s16"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/s24"
-                android:layout_weight="1"
-                android:orientation="vertical">
-                <TextView
-                    style="@style/Text.Primary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:text="@string/settings_music_title" />
-                <TextView
-                    android:id="@+id/musicSubtitle"
-                    style="@style/Text.Secondary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/s4"
-                    android:maxLines="2" />
-            </LinearLayout>
-            <Button
-                android:id="@+id/musicSample"
-                style="@style/Control.Button.Secondary"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/touch_min"
-                android:minWidth="200dp"
-                android:text="@string/settings_music_sample" />
-            <Button
-                android:id="@+id/musicReal"
-                style="@style/Control.Button.Secondary"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/touch_min"
-                android:layout_marginStart="@dimen/touch_gap"
-                android:minWidth="200dp"
-                android:text="@string/settings_music_real" />
-        </LinearLayout>
-                </LinearLayout>
+            app:rowLabel="@string/control_play_pause" />
+        <app.guantera.ui.components.LabelValueRowView
+            android:id="@+id/musicRowPrevious"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/s16"
+            app:rowLabel="@string/control_previous" />
+        <app.guantera.ui.components.LabelValueRowView
+            android:id="@+id/musicRowNext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/s16"
+            app:rowLabel="@string/control_next" />
+        <app.guantera.ui.components.LabelValueRowView
+            android:id="@+id/musicRowVolDown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/s16"
+            app:rowLabel="@string/control_volume_down" />
+        <app.guantera.ui.components.LabelValueRowView
+            android:id="@+id/musicRowVolUp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/s16"
+            app:rowLabel="@string/control_volume_up" />
+        <app.guantera.ui.components.LabelValueRowView
+            android:id="@+id/musicRowMute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/s16"
+            app:rowLabel="@string/control_mute" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

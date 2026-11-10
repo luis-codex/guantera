@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vistas de registros (Gastos y Viajes). Solo valores de la escala, salvo lo que se indica. -->
+    <dimen name="icon_size">32dp</dimen>
+    <dimen name="history_side_width">432dp</dimen>
+    <dimen name="history_row_height">96dp</dimen>
+    <!-- Estas pantallas nunca se ven con el auto andando: las celdas del calendario pueden bajar de 96 dp, no de 72. -->
+    <dimen name="cell_min_height">72dp</dimen>
+    <dimen name="cell_gap">4dp</dimen>
+    <dimen name="weekday_height">32dp</dimen>
+    <dimen name="month_cell_height">112dp</dimen>
+    <dimen name="bar_thickness">8dp</dimen>
+    <dimen name="text_cell">22sp</dimen>
+</resources>

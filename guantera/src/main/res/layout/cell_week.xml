@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Un día de la semana: nombre, número, total y una barra que sube según lo gastado o recorrido. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:background="@drawable/bg_day"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/cell_gap"
+    android:paddingTop="@dimen/s12"
+    android:paddingEnd="@dimen/cell_gap"
+    android:paddingBottom="@dimen/s12">
+    <TextView
+        android:id="@+id/name"
+        style="@style/Text.Cell"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/ink_faint" />
+    <TextView
+        android:id="@+id/number"
+        style="@style/Text.Headline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/s4" />
+    <TextView
+        android:id="@+id/total"
+        style="@style/Text.Cell.Total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/s4" />
+    <LinearLayout
+        android:id="@+id/bar"
+        android:layout_width="@dimen/s24"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/s12"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:weightSum="1">
+        <View
+            android:id="@+id/barEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+        <View
+            android:id="@+id/barFill"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@drawable/bar_fill" />
+    </LinearLayout>
+</LinearLayout>

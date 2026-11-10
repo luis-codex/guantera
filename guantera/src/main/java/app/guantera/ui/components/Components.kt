@@ -56,6 +56,13 @@ class LabelValueRowView(context: Context, attrs: AttributeSet?) : LinearLayout(c
     }
 
     fun setValue(value: CharSequence) { binding.value.text = value }
+
+    /** The one value that answers the screen's question: serif and larger, like the figures. */
+    fun emphasize() {
+        binding.value.typeface = ResourcesCompat.getFont(context, R.font.fraunces_regular)
+        binding.value.setTextSize(TypedValue.COMPLEX_UNIT_PX, resources.getDimension(R.dimen.text_primary))
+        binding.value.fontFeatureSettings = "lnum"
+    }
 }
 
 /** Large figure over a small label, inside a hairline cell. */
@@ -128,16 +135,6 @@ class ListRowView(context: Context, attrs: AttributeSet?) : LinearLayout(context
     fun setAction(text: CharSequence?) {
         binding.action.isVisible = text != null
         binding.action.text = text
-    }
-
-    /** Visible but off: used for what does not exist yet, with the reason in the subtitle. */
-    fun setActionDisabled(text: CharSequence) {
-        binding.action.isVisible = true
-        binding.action.text = text
-        binding.action.isEnabled = false
-        binding.action.minWidth = resources.getDimensionPixelSize(R.dimen.action_min_width)
-        binding.action.setBackgroundResource(R.drawable.bg_button_disabled)
-        binding.action.setTextColor(ContextCompat.getColor(context, R.color.ink_faint))
     }
 
     fun setSecondary() {
@@ -222,7 +219,6 @@ class VolumeControlsView(context: Context, attrs: AttributeSet?) : LinearLayout(
     fun render(playback: PlaybackUi) {
         binding.value.setText(
             when {
-                playback.commandFailed -> context.getString(R.string.music_no_response)
                 playback.muted -> context.getString(R.string.volume_muted)
                 playback.volumePercent == null -> context.getString(R.string.volume_unknown)
                 else -> context.getString(R.string.volume_percent, playback.volumePercent)
@@ -260,7 +256,6 @@ class TopBarView(context: Context, attrs: AttributeSet?) : LinearLayout(context,
             },
         )
         binding.clock.text = state.clockText
-        binding.sampleLabel.isVisible = state.showSampleLabel
     }
 
     private fun color(id: Int) = ContextCompat.getColor(context, id)

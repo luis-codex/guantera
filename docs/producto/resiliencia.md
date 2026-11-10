@@ -20,7 +20,7 @@ Principio del dueño: la app tiene que seguir siendo útil en el peor caso. Todo
 
 **Escritura segura:** escribir en un temporal, forzar a disco, releer y validar, y recién ahí renombrar. Una copia válida nunca se reemplaza antes de tener la siguiente validada.
 
-**Retención en la radio:** las últimas 7 copias, más una por semana durante 4 semanas, para que un error no descubierto a tiempo no se lleve todas las copias buenas.
+**Retención en la radio:** las últimas 7 copias, más la más nueva de cada semana calendario durante 4 semanas, para que un error no descubierto a tiempo no se lleve todas las copias buenas.
 
 ## Qué pasa en cada escenario
 | Escenario | Respuesta | Pérdida máxima |

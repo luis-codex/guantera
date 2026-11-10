@@ -23,18 +23,6 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
     <TextView
-        android:id="@+id/sampleLabel"
-        style="@style/Text.Label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_cell"
-        android:paddingStart="@dimen/s12"
-        android:paddingTop="@dimen/s4"
-        android:paddingEnd="@dimen/s12"
-        android:paddingBottom="@dimen/s4"
-        android:text="@string/sample_data"
-        android:textColor="@color/ink" />
-    <TextView
         android:id="@+id/clock"
         style="@style/Text.Secondary"
         android:layout_width="wrap_content"

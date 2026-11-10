@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ícono junto a texto (diseno.md, "Ícono y texto"). Medidas de la caja del ícono (icon_size, 32 dp), no de la tinta:
+         los íconos Lucide dejan 1 a 3 unidades de aire interno (1,3 a 4 dp), que suman al hueco visible. -->
+    <!-- Ícono y rótulo en la misma línea (riel, botones): ≈ 0,5 em del texto de 24 sp, menos el aire del ícono. -->
+    <dimen name="icon_gap_inline">@dimen/s8</dimen>
+    <!-- Ícono arriba del rótulo (categorías de gasto, rótulo de 20 sp): ≈ 0,35 em, menos el aire del ícono. -->
+    <dimen name="icon_gap_stacked">@dimen/s4</dimen>
+    <!-- Ícono que marca una fila de dos líneas (registros): el doble que en línea, porque rotula un bloque, no una palabra. -->
+    <dimen name="icon_gap_leading">@dimen/s16</dimen>
+</resources>

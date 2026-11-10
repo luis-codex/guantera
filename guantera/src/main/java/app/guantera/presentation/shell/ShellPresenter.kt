@@ -20,10 +20,11 @@ data class ShellViewState(
     val gps: GpsStatus,
     val motion: MotionStatus,
     val clockText: String,
-    val showSampleLabel: Boolean,
     val destination: Destination,
     /** While true, driving mode replaces the rail and every screen. */
     val isDriving: Boolean,
+    /** P0 takes the place of every screen until first use is completed. */
+    val showFirstUse: Boolean = false,
 )
 
 class ShellPresenter(
@@ -33,11 +34,12 @@ class ShellPresenter(
     clock: Clock,
     ticks: Flow<Long>,
     scope: CoroutineScope,
+    private val needsFirstUse: StateFlow<Boolean> = MutableStateFlow(false),
 ) {
     private val destination = MutableStateFlow(Destination.Home)
 
-    val state: StateFlow<ShellViewState> = combine(data.status, data.driving, destination, ticks) { status, driving, dest, now ->
-        ShellViewState(status.gps, status.motion, format.clock(now), data.isSample, dest, driving != null)
+    val state: StateFlow<ShellViewState> = combine(data.status, data.driving, destination, ticks, needsFirstUse) { status, driving, dest, now, firstUse ->
+        ShellViewState(status.gps, status.motion, format.clock(now), dest, driving != null, firstUse)
     }.stateIn(
         scope,
         SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
@@ -45,9 +47,9 @@ class ShellPresenter(
             gps = data.status.value.gps,
             motion = data.status.value.motion,
             clockText = format.clock(clock.nowMillis()),
-            showSampleLabel = data.isSample,
             destination = Destination.Home,
             isDriving = data.driving.value != null,
+            showFirstUse = needsFirstUse.value,
         ),
     )
 

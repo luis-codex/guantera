@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lucide "parking-meter" (ISC), ver assets/licencias/Lucide-ISC.txt -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/icon_size"
+    android:height="@dimen/icon_size"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M 11 15 h 2"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M 12 12 v 3"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M 12 19 v 3"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M 15.282 19 a 1 1 0 0 0 0.948 -0.68 l 2.37 -6.988 a 7 7 0 1 0 -13.2 0 l 2.37 6.988 a 1 1 0 0 0 0.948 0.68 z"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M 9 9 a 3 3 0 1 1 6 0"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

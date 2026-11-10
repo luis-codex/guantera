@@ -4,8 +4,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 /** Boundary between the presentation layer and wherever the car's data comes from. */
 interface GuanteraData {
-    /** True while the app shows invented data; the top bar must then say so. */
-    val isSample: Boolean
     val status: StateFlow<VehicleStatus>
     val home: StateFlow<HomeData>
     val profile: StateFlow<VehicleProfile>
@@ -16,17 +14,27 @@ interface GuanteraData {
     /** Every closed trip, newest first. */
     val trips: StateFlow<List<TripRecord>>
 
+    /** Closed trips that started from [fromMillis] (included) to [toMillis] (excluded), newest first. */
+    fun tripsBetween(fromMillis: Long, toMillis: Long): List<TripRecord> =
+        trips.value.filter { it.startMillis >= fromMillis && it.startMillis < toMillis }
+
     /** The current parking spot (R26), or null when none was ever saved. */
     val parkingSpot: StateFlow<ParkingDetail?>
 
-    /** "Ya estacioné": closes the current trip and saves the parking spot. */
+    /** "Ya estacioné": closes the current trip; the spot is saved by the engine. */
     fun confirmParked()
 
+    /** "Registro interrumpido": touching the banner closes it. */
+    fun dismissRecordingGap()
+
+    /** Answers "¿El auto está estacionado?" with yes (CU-04). Every form that was blocked can then be retried. */
+    fun confirmStopped()
+
     /** "Guardar acá ahora". Rejected while moving or without a valid GPS position (R27). */
-    fun saveSpotHere(): SaveSpotResult
+    suspend fun saveSpotHere(): SaveSpotResult
 
     /** Replaces the note of the current spot. A blank note removes it. */
-    fun saveSpotNote(note: String)
+    suspend fun saveSpotNote(note: String): FormOutcome
 }
 
 data class GeoPoint(val latitude: Double, val longitude: Double)
@@ -52,13 +60,7 @@ data class ParkingDetail(
     val isLastSignalPoint: Boolean,
 )
 
-enum class SaveSpotResult { Saved, NoValidFix, CarMoving }
-
-/** Only exists in demonstration builds, so production code cannot start a fake trip. */
-interface DemoControls {
-    fun startSimulatedTrip()
-    fun stopSimulatedTrip()
-}
+enum class SaveSpotResult { Saved, NoValidFix, CarMoving, NeedsConfirmation, Failed }
 
 enum class GpsStatus { Good, Searching, Off, NoPermission }
 
@@ -66,7 +68,8 @@ enum class MotionStatus { Stopped, Moving, Unknown }
 
 data class VehicleStatus(val gps: GpsStatus, val motion: MotionStatus)
 
-data class VehicleProfile(val name: String, val odometerKm: Int, val currency: String)
+/** [odometerKm] is null while no odometer was ever entered (R14): the screens say "sin datos". */
+data class VehicleProfile(val name: String, val odometerKm: Int?, val currency: String)
 
 data class TodaySummary(val kilometers: Double, val tripCount: Int)
 
@@ -107,5 +110,4 @@ data class DrivingData(
     /** Seconds spent in STOPPING, or null while the car is moving. */
     val stoppingSeconds: Long?,
     val urgentAlert: MaintenanceAlert?,
-    val isSimulated: Boolean,
 )

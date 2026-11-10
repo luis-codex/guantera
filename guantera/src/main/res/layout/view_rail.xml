@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Seven equal rows filling the height. Below the 96+16 minimum on purpose: the rail is never visible while driving. -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-    <Button android:id="@+id/home" style="@style/Control.Rail" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_home" />
-    <Button android:id="@+id/trips" style="@style/Control.Rail" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_trips" />
-    <Button android:id="@+id/maintenance" style="@style/Control.Rail" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_maintenance" />
-    <Button android:id="@+id/expenses" style="@style/Control.Rail" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_expenses" />
-    <Button android:id="@+id/music" style="@style/Control.Rail" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_music" />
-    <Button android:id="@+id/parked" style="@style/Control.Rail" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_parked" />
-    <Button android:id="@+id/settings" style="@style/Control.Rail" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_settings" />
+    <Button android:id="@+id/home" style="@style/Control.Rail" android:drawableStart="@drawable/ic_l_home" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_home" />
+    <Button android:id="@+id/trips" style="@style/Control.Rail" android:drawableStart="@drawable/ic_l_trip" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_trips" />
+    <Button android:id="@+id/maintenance" style="@style/Control.Rail" android:drawableStart="@drawable/ic_l_wrench" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_maintenance" />
+    <Button android:id="@+id/expenses" style="@style/Control.Rail" android:drawableStart="@drawable/ic_l_wallet" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_expenses" />
+    <Button android:id="@+id/music" style="@style/Control.Rail" android:drawableStart="@drawable/ic_l_music" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_music" />
+    <Button android:id="@+id/parked" style="@style/Control.Rail" android:drawableStart="@drawable/ic_l_parked" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_parked" />
+    <Button android:id="@+id/settings" style="@style/Control.Rail" android:drawableStart="@drawable/ic_l_settings" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="0dp" android:text="@string/nav_settings" />
 </merge>

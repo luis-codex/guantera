@@ -30,7 +30,7 @@ Origen de cada valor:
 Conversión usada: 1 mi = 1,609 km, redondeada.
 
 ## Comportamiento en la app
-- Se cargan en el primer uso. Todos se pueden editar o borrar, y se pueden agregar ítems propios.
+- Se cargan en el primer uso, salvo Seguro y Revisión técnica: no tienen valor por defecto y R15 exige una fecha, así que se agregan a mano con la fecha del trámite. Todos se pueden editar o borrar, y se pueden agregar ítems propios.
 - Sin último service cargado, el ítem queda SIN DATOS y no avisa: la app no supone cuándo se hizo.
 - El uso severo (ciudad, remolque, polvo, viajes cortos) puede acortar los intervalos. [2] reduce el aceite a 5.000 mi en esas condiciones. El manual suele tener su propia tabla.
 

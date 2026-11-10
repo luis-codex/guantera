@@ -1,87 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingStart="@dimen/screen_margin_h"
-    android:paddingTop="@dimen/screen_margin_v"
-    android:paddingEnd="@dimen/screen_margin_h">
-
-    <app.guantera.ui.components.SectionHeaderView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:sectionLabel="@string/nav_trips"
-        app:sectionNumber="@string/section_trips" />
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/listGroup"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
-
-        <TextView
-            style="@style/Text.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/inner_gap"
-            android:text="@string/trips_question" />
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/screen_margin_h"
+        android:paddingTop="@dimen/screen_margin_v"
+        android:paddingEnd="@dimen/screen_margin_h"
+        android:paddingBottom="@dimen/screen_margin_v">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/figure_row_height"
-            android:layout_marginTop="@dimen/block_gap"
-            android:orientation="horizontal">
-            <app.guantera.ui.components.FigureCellView
-                android:id="@+id/today"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                app:cellLabel="@string/trips_today" />
-            <app.guantera.ui.components.FigureCellView
-                android:id="@+id/week"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/card_gap"
-                android:layout_weight="1"
-                app:cellLabel="@string/trips_week" />
-            <app.guantera.ui.components.FigureCellView
-                android:id="@+id/month"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/card_gap"
-                android:layout_weight="1"
-                app:cellLabel="@string/trips_month" />
+            android:layout_width="@dimen/history_side_width"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <app.guantera.ui.components.SectionHeaderView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:sectionLabel="@string/nav_trips"
+                app:sectionNumber="@string/section_trips" />
+            <TextView
+                style="@style/Text.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/inner_gap"
+                android:maxLines="1"
+                android:text="@string/trips_question" />
+            <app.guantera.ui.components.LabelValueRowView
+                android:id="@+id/periodKm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/block_gap"
+                app:rowLabel="@string/trips_period_km" />
+            <app.guantera.ui.components.LabelValueRowView
+                android:id="@+id/periodTrips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/row_gap"
+                app:rowLabel="@string/trips_period_count" />
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+            <app.guantera.ui.history.HistoryControlsView
+                android:id="@+id/controls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/block_gap"
+        <app.guantera.ui.history.HistoryBodyView
+            android:id="@+id/body"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/block_gap"
             android:layout_weight="1"
-            android:overScrollMode="never"
-            android:scrollbarSize="@dimen/s4"
-            android:scrollbarThumbVertical="@color/line_strong"
-            android:scrollbars="vertical" />
-
-        <TextView
-            android:id="@+id/empty"
-            style="@style/Text.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/s48"
-            android:layout_weight="1"
-            android:text="@string/trips_empty"
-            android:visibility="gone" />
+            app:historyEmpty="@string/trips_empty_in"
+            app:historyEmptyHint="@string/trips_empty_hint" />
     </LinearLayout>
 
-    <include
-        android:id="@+id/detail"
-        layout="@layout/view_trip_detail"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:visibility="gone" />
-</LinearLayout>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/screen_margin_h"
+        android:paddingTop="@dimen/screen_margin_v"
+        android:paddingEnd="@dimen/screen_margin_h">
+        <app.guantera.ui.components.SectionHeaderView
+            android:id="@+id/detailHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:sectionLabel="@string/nav_trips"
+            app:sectionNumber="@string/section_trips" />
+        <include
+            android:id="@+id/detail"
+            layout="@layout/view_trip_detail"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>

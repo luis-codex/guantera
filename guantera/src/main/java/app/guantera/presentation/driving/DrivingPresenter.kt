@@ -5,7 +5,6 @@ import app.guantera.presentation.common.MaintenanceAlertUi
 import app.guantera.presentation.common.PlaybackActions
 import app.guantera.presentation.common.PlaybackUi
 import app.guantera.presentation.common.toUi
-import app.guantera.presentation.port.DemoControls
 import app.guantera.presentation.port.DrivingData
 import app.guantera.presentation.port.GuanteraData
 import kotlinx.coroutines.CoroutineScope
@@ -19,13 +18,11 @@ data class DrivingViewState(
     val minutesText: String,
     val alert: MaintenanceAlertUi?,
     val showParkedButton: Boolean,
-    val showEndSimulation: Boolean,
     val playback: PlaybackUi,
 )
 
 class DrivingPresenter(
     private val data: GuanteraData,
-    private val demo: DemoControls?,
     private val playback: PlaybackActions,
     private val format: DisplayFormat,
     scope: CoroutineScope,
@@ -42,7 +39,6 @@ class DrivingPresenter(
     fun volumeDown() = playback.volumeDown()
     fun volumeUp() = playback.volumeUp()
     fun confirmParked() = data.confirmParked()
-    fun endSimulation() { demo?.stopSimulatedTrip() }
 
     /**
      * Distance and time are floored on purpose: the numbers may only change once per km and once
@@ -53,7 +49,6 @@ class DrivingPresenter(
         minutesText = format.whole(((driving?.elapsedSeconds ?: 0) / SECONDS_PER_MINUTE).toInt()),
         alert = driving?.urgentAlert?.toUi(format),
         showParkedButton = (driving?.stoppingSeconds ?: 0) >= PARKED_BUTTON_AFTER_SECONDS,
-        showEndSimulation = driving?.isSimulated == true,
         playback = media,
     )
 

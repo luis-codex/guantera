@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Texto de celda: 22 sp como mínimo. -->
+    <style name="Text.Cell" parent="Text.Secondary">
+        <item name="android:textSize">@dimen/text_cell</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    <style name="Text.Cell.Total">
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:fontFamily">@font/space_grotesk_medium</item>
+        <item name="fontFamily">@font/space_grotesk_medium</item>
+    </style>
+    <style name="Text.Weekday" parent="Text.Label">
+        <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:gravity">center</item>
+    </style>
+</resources>

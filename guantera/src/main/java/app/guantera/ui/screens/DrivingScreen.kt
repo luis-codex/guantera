@@ -19,7 +19,6 @@ class DrivingScreen(parent: ViewGroup, private val presenter: DrivingPresenter) 
         binding.transport.setActions(presenter::previous, presenter::playPause, presenter::next)
         binding.volume.setActions(presenter::volumeDown, presenter::volumeUp)
         binding.parked.setOnClickListener { presenter.confirmParked() }
-        binding.endSimulation.setOnClickListener { presenter.endSimulation() }
     }
 
     override suspend fun observe() = presenter.state.collect(::render)
@@ -33,8 +32,8 @@ class DrivingScreen(parent: ViewGroup, private val presenter: DrivingPresenter) 
         binding.transport.setPlaying(state.playback.isPlaying)
         binding.transport.setPlayPrimary(!state.showParkedButton)
         binding.volume.render(state.playback)
+        binding.controlFailure.text = context.failureText(state.playback).orEmpty()
         binding.parked.isVisible = state.showParkedButton
-        binding.endSimulation.isVisible = state.showEndSimulation
-        binding.actions.isVisible = state.showParkedButton || state.showEndSimulation
+        binding.actions.isVisible = state.showParkedButton
     }
 }

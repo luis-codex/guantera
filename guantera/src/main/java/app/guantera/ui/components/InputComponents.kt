@@ -187,10 +187,32 @@ class TextFieldView(context: Context, attrs: AttributeSet?) : LinearLayout(conte
 class ChoiceButton(context: Context, attrs: AttributeSet?) : AppCompatButton(context, attrs) {
     private val regular = ResourcesCompat.getFont(context, R.font.space_grotesk_regular)
     private val medium = ResourcesCompat.getFont(context, R.font.space_grotesk_medium)
+    private var sidePadding = -1
 
     override fun setSelected(selected: Boolean) {
         super.setSelected(selected)
         typeface = if (selected) medium else regular
+        groupIconWithText()
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        groupIconWithText()
+    }
+
+    /**
+     * A button with an icon at its start would draw the icon at the edge and the text in the middle of what
+     * is left. Equal side padding makes the icon and the text one group, centered in the button.
+     */
+    private fun groupIconWithText() {
+        val icon = compoundDrawablesRelative[0] ?: return
+        if (width == 0) return
+        val content = icon.intrinsicWidth + compoundDrawablePadding + paint.measureText(text.toString())
+        val side = ((width - content) / 2f).toInt().coerceAtLeast(0)
+        if (side != sidePadding) {
+            sidePadding = side
+            setPaddingRelative(side, paddingTop, side, paddingBottom)
+        }
     }
 }
 

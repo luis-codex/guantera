@@ -27,6 +27,7 @@ class HomeScreen(
     parent: ViewGroup,
     private val presenter: HomePresenter,
     private val navigator: Navigator,
+    private val onGrantLocation: () -> Unit,
 ) : Screen() {
     private val binding = ScreenHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false)
     private val context = parent.context
@@ -74,8 +75,11 @@ class HomeScreen(
             NoticeAction.None -> binding.banner.show(message, null, null)
             NoticeAction.OpenSettings ->
                 binding.banner.show(message, context.getString(R.string.notice_action_settings)) {
+                    presenter.noticeTouched(notice.notice)
                     navigator.navigate(Destination.Settings)
                 }
+            NoticeAction.GrantLocation ->
+                binding.banner.show(message, context.getString(R.string.notice_action_grant)) { onGrantLocation() }
             NoticeAction.OpenLocationSettings ->
                 binding.banner.show(message, context.getString(R.string.notice_action_location)) {
                     if (!context.openSystemSettings(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) {
@@ -134,17 +138,21 @@ class HomeScreen(
         binding.playbackStatus.setText(statusText(playback.status))
         binding.transport.setPlaying(playback.isPlaying)
         when {
-            playback.commandFailed -> {
-                binding.playbackTitle.setText(R.string.music_no_response)
-                binding.playbackSubtitle.setText(R.string.music_nothing_subtitle)
+            playback.failedControl != null -> {
+                binding.playbackTitle.text = context.failureText(playback)
+                binding.playbackSubtitle.text = ""
             }
-            playback.needsNotificationAccess -> {
+            playback.isPlaying && !playback.hasTrack && playback.needsNotificationAccess -> {
                 binding.playbackTitle.setText(R.string.music_controls_active)
                 binding.playbackSubtitle.setText(R.string.music_open_to_see)
             }
             playback.hasTrack -> {
                 binding.playbackTitle.text = playback.title ?: context.getString(R.string.music_unknown_title)
                 binding.playbackSubtitle.text = listOfNotNull(playback.artist, playback.sourceApp).joinToString(" · ")
+            }
+            playback.isPlaying -> {
+                binding.playbackTitle.setText(R.string.music_unknown_title)
+                binding.playbackSubtitle.text = ""
             }
             else -> {
                 binding.playbackTitle.setText(R.string.music_nothing_title)

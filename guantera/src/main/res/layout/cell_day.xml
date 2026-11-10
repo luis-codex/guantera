@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Un día del calendario de un mes: número arriba, total abajo. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:background="@drawable/bg_day"
+    android:gravity="center"
+    android:minHeight="@dimen/cell_min_height"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/cell_gap"
+    android:paddingEnd="@dimen/cell_gap">
+    <TextView
+        android:id="@+id/number"
+        style="@style/Text.Cell"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/total"
+        style="@style/Text.Cell.Total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

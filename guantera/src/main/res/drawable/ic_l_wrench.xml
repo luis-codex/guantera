@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lucide "wrench" (ISC), ver assets/licencias/Lucide-ISC.txt -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/icon_size"
+    android:height="@dimen/icon_size"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M 14.7 6.3 a 1 1 0 0 0 0 1.4 l 1.6 1.6 a 1 1 0 0 0 1.4 0 l 3.106 -3.105 c 0.32 -0.322 0.863 -0.22 0.983 0.218 a 6 6 0 0 1 -8.259 7.057 l -7.91 7.91 a 1 1 0 0 1 -2.999 -3 l 7.91 -7.91 a 6 6 0 0 1 7.057 -8.259 c 0.438 0.12 0.54 0.662 0.219 0.984 z"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

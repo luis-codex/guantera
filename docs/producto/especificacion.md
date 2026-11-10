@@ -51,7 +51,7 @@ Conductor particular, un solo auto por radio. Sin cuenta, sin internet, sin dato
 - CU-01, CU-03, CU-20.
 
 **P3. Viajes**: ¿cuánto anduve?
-- Encabezado: km de hoy, de la semana y del mes. Lista paginada con arrastre manual: fecha, hora de inicio, duración, km.
+- Encabezado: km y cantidad de viajes del período elegido. Período (Semana, Mes, Año, Rango) y vista (Lista o Calendario) iguales a P8. Lista agrupada por día con el total del día y arrastre manual: hora de inicio, duración, km.
 - Marca "Cierre estimado" en viajes recuperados tras un corte. Los viajes son de solo lectura en v1.
 - Acciones: tocar un viaje abre P4.
 - Vacío: "Todavía no hay viajes. Se registran solos cuando el auto se mueve."
@@ -77,8 +77,8 @@ Conductor particular, un solo auto por radio. Sin cuenta, sin internet, sin dato
 - Acciones: Guardar, Cancelar. Con costo, crea el gasto en categoría Mantenimiento. CU-12.
 
 **P8. Gastos**: ¿cuánto me sale?
-- Encabezado: **costo por km** en cifra grande, total y km del período. Selector: Este mes, 12 meses (por defecto), Todo.
-- Lista paginada: fecha, categoría, monto.
+- Encabezado: **costo por km** en cifra grande, total y km del período elegido. Período: Semana, Mes (por defecto), Año o Rango (de un mes a otro), con Anterior y Siguiente. Vista: Lista agrupada por día con el total del día, o Calendario (semana, mes, año o meses del rango; tocar un día muestra sus gastos y tocar un mes entra a ese mes).
+- Cada fila lleva el ícono de su categoría (Lucide, licencia ISC) junto al texto.
 - Acciones: "Nuevo" abre P9, tocar una fila abre P9 con datos.
 - Vacío: "Sin gastos cargados." Con menos de 50 km en el período, el costo por km muestra "Pocos km para calcular".
 - CU-15, CU-16, CU-17, CU-18.
@@ -133,7 +133,7 @@ Un solo banner a la vez, en este orden de prioridad. Datos anteriores siempre vi
 |---|---|---|---|
 | Sin permiso de ubicación | "Sin permiso de ubicación. No se registran viajes." | Conceder (P11) | Sin registro, estado DESCONOCIDO |
 | GPS apagado | "GPS apagado. No se registran viajes." | Abrir ajustes de ubicación | Igual que arriba |
-| Fecha no confiable | "La hora de la radio parece mal. Avisos por fecha en pausa." | Se corrige sola con GPS | Ítems por fecha sin aviso |
+| Fecha no confiable y sin ningún fix que la reemplace (R29) | "La hora de la radio parece mal. Avisos por fecha en pausa." | Se corrige sola con GPS | Ítems por fecha sin aviso |
 | Buscando señal | "Buscando GPS…" | Ninguna | Registro en espera |
 | Odómetro sin cargar | "Cargá el odómetro para avisos por km." | Abrir P11 | Ejes por km SIN DATOS |
 | Error al guardar | "No se pudo guardar. Probá de nuevo." | Reintentar | El formulario conserva los datos |

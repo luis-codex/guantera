@@ -66,10 +66,21 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Falla de un control: una línea de altura reservada, sin mover los botones. -->
+    <TextView
+        android:id="@+id/controlFailure"
+        style="@style/Text.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inner_gap"
+        android:ellipsize="end"
+        android:lines="1"
+        android:textColor="@color/signal" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/block_gap"
+        android:layout_marginTop="@dimen/inner_gap"
         android:gravity="center_vertical"
         android:orientation="horizontal">
         <app.guantera.ui.components.TransportControlsView
@@ -97,12 +108,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/button_gap_driving"
         android:orientation="horizontal">
-        <Button
-            android:id="@+id/endSimulation"
-            style="@style/Control.Button.Secondary"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/touch_min"
-            android:text="@string/drive_end_simulation" />
         <Space
             android:layout_width="0dp"
             android:layout_height="0dp"

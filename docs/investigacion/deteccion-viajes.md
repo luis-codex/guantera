@@ -11,10 +11,13 @@
 ## 2. Sanitización e inferencia de puntos (`sanitizePoint`)
 Aplica a todos los estados antes de entrar a la FSM:
 1. Precisión: si `!pt.hasAccuracy() || pt.accuracy > ACCURACY_MAX`, descartar punto.
-2. Velocidad: si `pt.hasSpeed()`, usar `pt.speed`. Si `!pt.hasSpeed()`, si `lastValidPt != null && dt > 0` usar `haversine(lastValidPt, pt) / dt`; caso contrario, `0.0f`.
+2. Orden: un punto con `monoMs` no posterior al último aceptado se descarta.
+3. Velocidad: si `pt.hasSpeed()`, usar `pt.speed`. Si `!pt.hasSpeed()`, usar `haversine(previo, pt) / dt`, donde `previo` es el último punto aceptado por esta sanitización en cualquier estado; sin `previo`, `0.0f`. No se usa `lastValidPt`, porque en `PARKED` no avanza y un receptor sin velocidad nunca podría arrancar un viaje.
 
 ## 3. Máquina de estados (FSM pura en Domain)
 Estados: `PARKED`, `STARTING`, `IN_TRIP`, `STOPPING`. Eventos: `OnPoint(pt)`, `OnTick(nowMonoMs)`.
+
+Dos precisiones sobre el pseudocódigo: un punto aceptado aplica primero `onTick(pt.monoMs)`, para que un vencimiento no dependa de que haya llegado un tick antes; y en `STARTING`, `IN_TRIP` y `STOPPING` (al reanudar) un salto que supera `MAX_SPEED_PLAUSIBLE` contra la última ancla no mueve la máquina ni actualiza `lastValidPt`, para que un punto espurio no termine siendo el lugar de estacionado.
 
 ```kotlin
 fun onPoint(pt: Point) {

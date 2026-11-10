@@ -14,6 +14,7 @@ import app.guantera.presentation.input.PadExtra
 import app.guantera.presentation.input.PadKey
 import app.guantera.presentation.input.PadSpec
 import app.guantera.presentation.port.MaintenanceLevel
+import app.guantera.presentation.port.FormOutcome
 import app.guantera.presentation.port.VehicleProfile
 import app.guantera.sonda.domain.port.Clock
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.util.TimeZone
 
 /** One row of P5. The screen composes the sentences from these parts. */
@@ -40,7 +42,7 @@ data class MaintenanceRowUi(
     val lastDateText: String?,
 )
 
-enum class MaintenanceNotice { ServiceSaved, ServiceSavedWithExpense, ItemSaved, ItemDeleted, CatalogRestored, CatalogComplete }
+enum class MaintenanceNotice { ServiceSaved, ServiceSavedWithExpense, ItemSaved, ItemDeleted, CatalogRestored, CatalogComplete, SaveFailed, CarMoving }
 
 data class OverviewUi(
     val rows: List<MaintenanceRowUi>,
@@ -92,7 +94,7 @@ class MaintenancePresenter(
     private val clock: Clock,
     private val format: LedgerFormat,
     ticks: Flow<Long>,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
     private val timeZone: TimeZone = TimeZone.getDefault(),
 ) {
     private sealed interface Mode {
@@ -109,6 +111,8 @@ class MaintenancePresenter(
         val pendingOpen: Mode? = null,
         val notice: MaintenanceNotice? = null,
         val restoredCount: Int = 0,
+        /** What to run again once the driver says the car is parked (CU-04). */
+        val retry: (() -> Unit)? = null,
     )
 
     private val ui = MutableStateFlow(Ui())
@@ -143,13 +147,19 @@ class MaintenancePresenter(
     }
 
     fun restoreCatalog() {
-        val restored = data.restoreCatalog()
-        ui.update {
-            it.copy(
-                notice = if (restored > 0) MaintenanceNotice.CatalogRestored else MaintenanceNotice.CatalogComplete,
-                restoredCount = restored,
-                pageIndex = 0,
-            )
+        scope.launch {
+            val result = data.restoreCatalog()
+            if (result.outcome == FormOutcome.Saved) {
+                ui.update {
+                    it.copy(
+                        notice = if (result.restored > 0) MaintenanceNotice.CatalogRestored else MaintenanceNotice.CatalogComplete,
+                        restoredCount = result.restored,
+                        pageIndex = 0,
+                    )
+                }
+            } else {
+                refused(result.outcome, ::restoreCatalog)
+            }
         }
     }
 
@@ -167,7 +177,7 @@ class MaintenancePresenter(
     /** A text field took the system keyboard. */
     fun focusText() = updateDraft { it.focusText() }
 
-    fun cancel() = ui.update { it.copy(mode = Mode.Overview, confirm = null, pendingOpen = null) }
+    fun cancel() = ui.update { it.copy(mode = Mode.Overview, confirm = null, pendingOpen = null, retry = null) }
 
     fun save() {
         when (val mode = ui.value.mode) {
@@ -188,20 +198,21 @@ class MaintenancePresenter(
         when (current.confirm?.kind) {
             ConfirmKind.ParkedCheck -> {
                 gate.confirm()
-                ui.update { it.copy(mode = it.pendingOpen ?: it.mode, pendingOpen = null, confirm = null) }
+                ui.update { it.copy(mode = it.pendingOpen ?: it.mode, pendingOpen = null, confirm = null, retry = null) }
+                current.retry?.invoke()
             }
             ConfirmKind.DeleteItem -> {
                 val item = (current.mode as? Mode.EditItem)?.item
-                if (item != null) data.delete(item.id)
-                ui.update {
-                    it.copy(mode = Mode.Overview, confirm = null, notice = MaintenanceNotice.ItemDeleted)
+                ui.update { it.copy(confirm = null) }
+                if (item != null) {
+                    submit({ ui.update { it.copy(mode = Mode.Overview, notice = MaintenanceNotice.ItemDeleted) } }) { data.delete(item.id) }
                 }
             }
             else -> ui.update { it.copy(confirm = null) }
         }
     }
 
-    fun confirmNo() = ui.update { it.copy(confirm = null, pendingOpen = null) }
+    fun confirmNo() = ui.update { it.copy(confirm = null, pendingOpen = null, retry = null) }
 
     /** True when the back press was consumed, which leaves a form for the list. */
     fun onBack(): Boolean {
@@ -258,7 +269,7 @@ class MaintenancePresenter(
     private fun serviceDraft(item: MaintenanceItem) = FormDraft(
         entries = buildMap {
             put(FormField.ServiceDate, PadEntry.ofDate(today()))
-            put(FormField.ServiceKm, PadEntry.ofInt(KM_SPEC, profile.value.odometerKm.takeIf { it > 0 }))
+            put(FormField.ServiceKm, PadEntry.ofInt(KM_SPEC, profile.value.odometerKm?.takeIf { it > 0 }))
             put(FormField.Cost, PadEntry(MONEY_SPEC))
             if (item.fixedDueDate != null) put(FormField.NewDue, PadEntry.ofDate(null))
         },
@@ -288,8 +299,7 @@ class MaintenancePresenter(
         val previous = mode.item
         val sameRule = previous != null && previous.intervalKm == intervalKm &&
             previous.intervalMonths == intervalMonths && previous.fixedDueDate == fixed
-        data.save(
-            MaintenanceItem(
+        val item = MaintenanceItem(
                 id = previous?.id ?: 0L,
                 name = name,
                 intervalKm = intervalKm,
@@ -298,9 +308,8 @@ class MaintenancePresenter(
                 lastServiceKm = draft.entry(FormField.LastKm).intValue(),
                 lastServiceDate = last,
                 origin = if (sameRule) previous!!.origin else DataOrigin.Own,
-            ),
         )
-        ui.update { it.copy(mode = Mode.Overview, notice = MaintenanceNotice.ItemSaved) }
+        submit({ ui.update { it.copy(mode = Mode.Overview, notice = MaintenanceNotice.ItemSaved) } }) { data.save(item) }
     }
 
     private fun saveService(mode: Mode.Service) {
@@ -326,20 +335,40 @@ class MaintenancePresenter(
         }
         val note = draft.text(FormField.Note).trim().ifEmpty { null }
         val cost = draft.entry(FormField.Cost).minorValue()
-        data.registerService(ServiceRegistration(item.id, date, km, cost, note, newDue))
-        ui.update {
-            it.copy(
-                mode = Mode.Overview,
-                notice = if (cost != null) MaintenanceNotice.ServiceSavedWithExpense else MaintenanceNotice.ServiceSaved,
-            )
-        }
+        val registration = ServiceRegistration(item.id, date, km, cost, note, newDue)
+        val saved = if (cost != null) MaintenanceNotice.ServiceSavedWithExpense else MaintenanceNotice.ServiceSaved
+        submit({ ui.update { it.copy(mode = Mode.Overview, notice = saved) } }) { data.registerService(registration) }
     }
 
     private fun fail(error: FormError, field: FormField?) = updateDraft { it.fail(error, field) }
 
+    /** Writes through the domain and acts on how it ended. A form that failed keeps its draft, so saving again retries. */
+    private fun submit(onSaved: () -> Unit, write: suspend () -> FormOutcome) {
+        scope.launch {
+            val outcome = write()
+            if (outcome == FormOutcome.Saved) onSaved() else refused(outcome) { submit(onSaved, write) }
+        }
+    }
+
+    private fun refused(outcome: FormOutcome, retry: () -> Unit) {
+        when (outcome) {
+            FormOutcome.Saved -> Unit
+            FormOutcome.NeedsConfirmation ->
+                ui.update { it.copy(confirm = ConfirmUi(ConfirmKind.ParkedCheck, null), retry = retry) }
+            FormOutcome.CarMoving -> problem(FormError.CarMoving, MaintenanceNotice.CarMoving)
+            FormOutcome.StorageFull -> problem(FormError.SaveFull, MaintenanceNotice.SaveFailed)
+            FormOutcome.Rejected, FormOutcome.StorageFailed -> problem(FormError.SaveFailed, MaintenanceNotice.SaveFailed)
+        }
+    }
+
+    /** Inside a form the sentence goes to the form; on the list it is the notice. */
+    private fun problem(error: FormError, notice: MaintenanceNotice) {
+        if (ui.value.mode == Mode.Overview) ui.update { it.copy(notice = notice) } else fail(error, null)
+    }
+
     private fun reduce(current: Ui, items: List<MaintenanceItem>, vehicle: VehicleProfile): MaintenanceViewState {
         val page: MaintenancePage = when (val mode = current.mode) {
-            Mode.Overview -> MaintenancePage.Overview(overview(current, items, vehicle.odometerKm.takeIf { it > 0 }))
+            Mode.Overview -> MaintenancePage.Overview(overview(current, items, vehicle.odometerKm?.takeIf { it > 0 }))
             is Mode.EditItem -> MaintenancePage.ItemForm(
                 isNew = mode.item == null,
                 name = mode.draft.text(FormField.Name),

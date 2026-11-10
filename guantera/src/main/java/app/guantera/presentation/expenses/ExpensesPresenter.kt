@@ -1,5 +1,19 @@
 package app.guantera.presentation.expenses
 
+import app.guantera.presentation.history.HistoryActions
+import app.guantera.presentation.history.HistoryBuilder
+import app.guantera.presentation.history.HistoryController
+import app.guantera.presentation.history.HistoryEntry
+import app.guantera.presentation.history.HistoryLayout
+import app.guantera.presentation.history.HistoryRowUi
+import app.guantera.presentation.history.HistoryState
+import app.guantera.presentation.history.HistoryUi
+import app.guantera.presentation.history.HistoryUnit
+import app.guantera.presentation.history.MoneyNumbers
+import app.guantera.presentation.history.PeriodKind
+import app.guantera.presentation.history.RowText
+import app.guantera.presentation.history.YearMonth
+import app.guantera.presentation.history.historyIcon
 import app.guantera.presentation.input.CalendarDate
 import app.guantera.presentation.input.DateReading
 import app.guantera.presentation.input.FieldUi
@@ -16,6 +30,7 @@ import app.guantera.presentation.input.PadSpec
 import app.guantera.presentation.maintenance.ConfirmKind
 import app.guantera.presentation.maintenance.ConfirmUi
 import app.guantera.presentation.port.VehicleProfile
+import app.guantera.presentation.port.FormOutcome
 import app.guantera.sonda.domain.port.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -25,9 +40,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 import java.util.TimeZone
-
-enum class ExpensePeriod { ThisMonth, TwelveMonths, All }
 
 /** R23 and R24. */
 sealed interface CostPerKm {
@@ -36,27 +51,20 @@ sealed interface CostPerKm {
 
     /** Fewer than 50 km in the period: not enough to divide by. */
     data object TooFewKm : CostPerKm
+
+    /** The use case has not answered for this period yet. */
+    data object Calculating : CostPerKm
 }
 
-data class ExpenseRowUi(
-    val id: Long,
-    val category: ExpenseCategory,
-    val amountText: String,
-    val dateText: String,
-    val note: String?,
-)
-
-enum class ExpenseNotice { Saved, Deleted }
+enum class ExpenseNotice { Saved, Deleted, SaveFailed, CarMoving }
 
 data class ExpensesOverviewUi(
-    val period: ExpensePeriod,
+    /** Period, layout and records, the same component as Viajes. */
+    val history: HistoryUi,
+    /** Everything below answers to the period in [history]. */
     val costPerKm: CostPerKm,
     val totalText: String,
     val kmText: String,
-    val rows: List<ExpenseRowUi>,
-    val pageIndex: Int,
-    val pageCount: Int,
-    val isEmpty: Boolean,
     val notice: ExpenseNotice?,
 )
 
@@ -84,39 +92,83 @@ class ExpensesPresenter(
     private val clock: Clock,
     private val format: LedgerFormat,
     ticks: Flow<Long>,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
     private val timeZone: TimeZone = TimeZone.getDefault(),
 ) {
     private data class Editing(val existing: Expense?, val category: ExpenseCategory?, val draft: FormDraft)
 
     private data class Ui(
-        val period: ExpensePeriod = ExpensePeriod.TwelveMonths,
-        val pageIndex: Int = 0,
         val editing: Editing? = null,
         val pendingOpen: Editing? = null,
         val confirm: ConfirmUi? = null,
         val notice: ExpenseNotice? = null,
+        val retry: (() -> Unit)? = null,
     )
 
     private val ui = MutableStateFlow(Ui())
+    private val history = HistoryController(::today)
+    private val numbers = MoneyNumbers(format)
 
-    val state: StateFlow<ExpensesViewState> = combine(ui, data.expenses, profile, ticks) { current, expenses, vehicle, _ ->
-        reduce(current, expenses, vehicle)
+    /** The answer of CU-18 for the period on screen; null until the use case replies. */
+    private val cost = MutableStateFlow<PeriodCost?>(null)
+
+    init {
+        scope.launch {
+            var shown: Pair<CalendarDate, CalendarDate>? = null
+            combine(history.state, data.expenses) { view, _ -> periodOf(view) }.collectLatest { period ->
+                // A new period shows "calculating" until the use case answers; the same period just refreshes.
+                if (period != shown) cost.value = null
+                shown = period
+                cost.value = period?.let { (from, to) -> data.costPerKm(from, to) } ?: PeriodCost(0, 0.0, null)
+            }
+        }
+    }
+
+    private val context = combine(profile, ticks, cost) { vehicle, _, pricing -> vehicle to pricing }
+
+    val state: StateFlow<ExpensesViewState> = combine(ui, history.state, data.expenses, context) { current, view, _, (vehicle, pricing) ->
+        reduce(current, view, vehicle, pricing)
     }.stateIn(
         scope,
         SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-        reduce(ui.value, data.expenses.value, profile.value),
+        reduce(ui.value, history.state.value, profile.value, cost.value),
     )
+
+    /** Nothing is dated in the future (P9 refuses it), so a period that reaches past today ends today. */
+    private fun periodOf(view: HistoryState): Pair<CalendarDate, CalendarDate>? {
+        val span = view.nav.span
+        val until = minOf(span.to, today())
+        return if (span.from > until) null else span.from to until
+    }
 
     private fun today(): CalendarDate = CalendarDate.fromMillis(clock.nowMillis(), timeZone)
 
     // ---- P8 -------------------------------------------------------------------------------
 
-    fun selectPeriod(period: ExpensePeriod) = ui.update { it.copy(period = period, pageIndex = 0, notice = null) }
+    /** Period, layout and day moves. Any of them also dismisses the last "guardado" notice. */
+    val historyActions: HistoryActions = object : HistoryActions {
+        override fun selectKind(kind: PeriodKind) = moved { history.selectKind(kind) }
+        override fun selectLayout(layout: HistoryLayout) = moved { history.selectLayout(layout) }
+        override fun previousPeriod() = moved { history.previous() }
+        override fun nextPeriod() = moved { history.next() }
+        override fun openDay(date: CalendarDate) = moved { history.openDay(date) }
+        override fun closeDay() = moved { history.closeDay() }
+        override fun openMonth(month: YearMonth) = moved { history.openMonth(month) }
+        override fun stepRangeFrom(delta: Int) = moved { history.stepRangeFrom(delta) }
+        override fun stepRangeTo(delta: Int) = moved { history.stepRangeTo(delta) }
+        override fun openRow(id: Long) = openExpense(id)
 
-    fun nextPage() = ui.update { it.copy(pageIndex = it.pageIndex + 1, notice = null) }
+        private fun moved(change: () -> Unit) {
+            change()
+            ui.update { it.copy(notice = null) }
+        }
+    }
 
-    fun previousPage() = ui.update { it.copy(pageIndex = (it.pageIndex - 1).coerceAtLeast(0), notice = null) }
+    /** Called when the user leaves the screen: the next visit starts from the current month. */
+    fun reset() {
+        cancel()
+        history.reset()
+    }
 
     fun newExpense() = open(Editing(null, null, blankDraft()))
 
@@ -153,7 +205,7 @@ class ExpensesPresenter(
 
     fun setNote(text: String) = updateEditing { it.copy(draft = it.draft.withText(FormField.Note, text)) }
 
-    fun cancel() = ui.update { it.copy(editing = null, confirm = null, pendingOpen = null) }
+    fun cancel() = ui.update { it.copy(editing = null, confirm = null, pendingOpen = null, retry = null) }
 
     fun save() {
         val editing = ui.value.editing ?: return
@@ -165,17 +217,15 @@ class ExpensesPresenter(
             else -> return failWith(FormError.InvalidDate, FormField.ExpenseDate)
         }
         if (date > today()) return failWith(FormError.FutureDate, FormField.ExpenseDate)
-        data.save(
-            Expense(
-                id = editing.existing?.id ?: 0L,
-                category = category,
-                amountMinor = amount,
-                date = date,
-                note = draft.text(FormField.Note).trim().ifEmpty { null },
-                serviceRecordId = editing.existing?.serviceRecordId,
-            ),
+        val expense = Expense(
+            id = editing.existing?.id ?: 0L,
+            category = category,
+            amountMinor = amount,
+            date = date,
+            note = draft.text(FormField.Note).trim().ifEmpty { null },
+            serviceRecordId = editing.existing?.serviceRecordId,
         )
-        ui.update { it.copy(editing = null, notice = ExpenseNotice.Saved, pageIndex = 0) }
+        submit({ ui.update { it.copy(editing = null, notice = ExpenseNotice.Saved) } }) { data.save(expense) }
     }
 
     fun askDelete() {
@@ -188,25 +238,29 @@ class ExpensesPresenter(
         when (current.confirm?.kind) {
             ConfirmKind.ParkedCheck -> {
                 gate.confirm()
-                ui.update { it.copy(editing = it.pendingOpen, pendingOpen = null, confirm = null) }
+                ui.update { it.copy(editing = it.pendingOpen ?: it.editing, pendingOpen = null, confirm = null, retry = null) }
+                current.retry?.invoke()
             }
             ConfirmKind.DeleteExpense -> {
-                current.editing?.existing?.let { data.delete(it.id) }
-                ui.update { it.copy(editing = null, confirm = null, notice = ExpenseNotice.Deleted) }
+                val existing = current.editing?.existing
+                ui.update { it.copy(confirm = null) }
+                if (existing != null) {
+                    submit({ ui.update { it.copy(editing = null, notice = ExpenseNotice.Deleted) } }) { data.delete(existing.id) }
+                }
             }
             else -> ui.update { it.copy(confirm = null) }
         }
     }
 
-    fun confirmNo() = ui.update { it.copy(confirm = null, pendingOpen = null) }
+    fun confirmNo() = ui.update { it.copy(confirm = null, pendingOpen = null, retry = null) }
 
-    /** True when the back press was consumed, which leaves the form for the list. */
+    /** True when the back press was consumed: it leaves the form for the list, or an open day for the calendar. */
     fun onBack(): Boolean {
         if (ui.value.confirm != null) {
             confirmNo()
             return true
         }
-        if (ui.value.editing == null) return false
+        if (ui.value.editing == null) return history.closeDay()
         cancel()
         return true
     }
@@ -235,7 +289,29 @@ class ExpensesPresenter(
 
     private fun failWith(error: FormError, field: FormField?) = updateEditing { it.copy(draft = it.draft.fail(error, field)) }
 
-    private fun reduce(current: Ui, expenses: List<Expense>, vehicle: VehicleProfile): ExpensesViewState {
+    /** Writes through the domain and acts on how it ended. A form that failed keeps its draft, so saving again retries. */
+    private fun submit(onSaved: () -> Unit, write: suspend () -> FormOutcome) {
+        scope.launch {
+            val outcome = write()
+            if (outcome == FormOutcome.Saved) onSaved() else refused(outcome) { submit(onSaved, write) }
+        }
+    }
+
+    private fun refused(outcome: FormOutcome, retry: () -> Unit) {
+        when (outcome) {
+            FormOutcome.Saved -> Unit
+            FormOutcome.NeedsConfirmation -> ui.update { it.copy(confirm = ConfirmUi(ConfirmKind.ParkedCheck, null), retry = retry) }
+            FormOutcome.CarMoving -> problem(FormError.CarMoving, ExpenseNotice.CarMoving)
+            FormOutcome.StorageFull -> problem(FormError.SaveFull, ExpenseNotice.SaveFailed)
+            FormOutcome.Rejected, FormOutcome.StorageFailed -> problem(FormError.SaveFailed, ExpenseNotice.SaveFailed)
+        }
+    }
+
+    private fun problem(error: FormError, notice: ExpenseNotice) {
+        if (ui.value.editing == null) ui.update { it.copy(notice = notice) } else failWith(error, null)
+    }
+
+    private fun reduce(current: Ui, view: HistoryState, vehicle: VehicleProfile, pricing: PeriodCost?): ExpensesViewState {
         val editing = current.editing
         val page: ExpensesPage = if (editing != null) {
             ExpensesPage.Form(
@@ -251,47 +327,53 @@ class ExpensesPresenter(
                 linkedToService = editing.existing?.serviceRecordId != null,
             )
         } else {
-            ExpensesPage.Overview(overview(current, expenses))
+            ExpensesPage.Overview(overview(current, view, pricing))
         }
         return ExpensesViewState(page, current.confirm, vehicle.currency)
     }
 
-    private fun overview(current: Ui, expenses: List<Expense>): ExpensesOverviewUi {
+    private fun overview(current: Ui, view: HistoryState, pricing: PeriodCost?): ExpensesOverviewUi {
         val today = today()
-        val from = when (current.period) {
-            ExpensePeriod.ThisMonth -> CalendarDate(today.year, today.month, 1)
-            ExpensePeriod.TwelveMonths -> today.plusMonths(-12).plusDays(1)
-            ExpensePeriod.All -> null
-        }
-        val inPeriod = expenses.filter { (from == null || it.date >= from) && it.date <= today }
-            .sortedWith(compareByDescending<Expense> { it.date }.thenByDescending { it.id })
-        val total = inPeriod.sumOf { it.amountMinor }
-        val km = data.tripKilometers(from, today)
-        val cost = if (km < MIN_KM_FOR_COST) {
-            CostPerKm.TooFewKm
+        val span = view.nav.span
+        // Nothing is dated in the future (P9 refuses it), so a period that reaches past today ends today.
+        val until = minOf(span.to, today)
+        val inPeriod = if (span.from > until) {
+            emptyList()
         } else {
-            CostPerKm.Value(format.moneyExact(total / 100.0 / km))
+            data.expensesBetween(span.from, until)
+                .sortedWith(compareByDescending<Expense> { it.date }.thenByDescending { it.id })
         }
-        val pageCount = ((inPeriod.size + PAGE_SIZE - 1) / PAGE_SIZE).coerceAtLeast(1)
-        val pageIndex = current.pageIndex.coerceIn(0, pageCount - 1)
+        val entries = inPeriod.map { expense ->
+            HistoryEntry(
+                date = expense.date,
+                value = expense.amountMinor.toDouble(),
+                row = HistoryRowUi(
+                    id = expense.id,
+                    icon = expense.category.historyIcon(),
+                    title = RowText.Category(expense.category),
+                    meta = expense.note,
+                    valueText = format.money(expense.amountMinor),
+                ),
+            )
+        }
+        // The figures come from the same range as the list; until the use case answers, the list's own sum stands in.
+        val total = pricing?.totalMinor ?: inPeriod.sumOf { it.amountMinor }
+        val km = pricing?.km ?: 0.0
+        val cost = when {
+            pricing == null -> CostPerKm.Calculating
+            pricing.minorPerKm == null -> CostPerKm.TooFewKm
+            else -> CostPerKm.Value(format.moneyExact(pricing.minorPerKm / 100.0))
+        }
         return ExpensesOverviewUi(
-            period = current.period,
+            history = HistoryBuilder.build(view, today, entries, HistoryUnit.Money, numbers),
             costPerKm = cost,
             totalText = format.money(total),
             kmText = format.kilometers(km),
-            rows = inPeriod.drop(pageIndex * PAGE_SIZE).take(PAGE_SIZE).map {
-                ExpenseRowUi(it.id, it.category, format.money(it.amountMinor), format.date(it.date), it.note)
-            },
-            pageIndex = pageIndex,
-            pageCount = pageCount,
-            isEmpty = inPeriod.isEmpty(),
             notice = current.notice,
         )
     }
 
     companion object {
-        const val PAGE_SIZE = 3
-        const val MIN_KM_FOR_COST = 50.0
         private val MONEY_SPEC = PadSpec.Decimal(maxIntDigits = 9, decimals = 2)
         private const val STOP_TIMEOUT_MILLIS = 5_000L
     }

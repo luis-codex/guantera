@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lucide "wallet" (ISC), ver assets/licencias/Lucide-ISC.txt -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/icon_size"
+    android:height="@dimen/icon_size"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M 19 7 V 4 a 1 1 0 0 0 -1 -1 H 5 a 2 2 0 0 0 0 4 h 15 a 1 1 0 0 1 1 1 v 4 h -3 a 2 2 0 0 0 0 4 h 3 a 1 1 0 0 0 1 -1 v -2 a 1 1 0 0 0 -1 -1"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M 3 5 v 14 a 2 2 0 0 0 2 2 h 15 a 1 1 0 0 0 1 -1 v -4"
+        android:strokeColor="@color/ink"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

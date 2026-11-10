@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Encabezado de un día: fecha a la izquierda, total del día a la derecha, filete debajo. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/s8"
+    android:paddingBottom="@dimen/s8">
+    <TextView
+        android:id="@+id/date"
+        style="@style/Text.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1" />
+    <View
+        android:layout_width="0dp"
+        android:layout_height="@dimen/line"
+        android:layout_marginStart="@dimen/s16"
+        android:layout_marginEnd="@dimen/s16"
+        android:layout_weight="1"
+        android:background="@color/line_soft" />
+    <TextView
+        android:id="@+id/total"
+        style="@style/Text.Secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:textColor="@color/ink" />
+</LinearLayout>

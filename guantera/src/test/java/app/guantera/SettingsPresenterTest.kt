@@ -1,22 +1,23 @@
 package app.guantera
 
-import app.guantera.media.MusicModeStore
-import app.guantera.media.SwitchableMediaPlayerControl
 import app.guantera.presentation.common.DisplayFormat
 import app.guantera.presentation.port.AppSettings
+import app.guantera.presentation.port.BackupActions
+import app.guantera.presentation.port.ExportOutcome
+import app.guantera.presentation.port.FormOutcome
+import app.guantera.presentation.port.ImportOutcome
+import app.guantera.presentation.settings.SettingsDialog
 import app.guantera.presentation.port.DateTimeInfo
 import app.guantera.presentation.port.DateTimeSettings
 import app.guantera.presentation.port.MotionStatus
-import app.guantera.presentation.port.MusicSource
 import app.guantera.presentation.port.SettingsStore
 import app.guantera.presentation.settings.DateTimeUi
 import app.guantera.presentation.settings.OdometerResult
 import app.guantera.presentation.settings.SettingsPresenter
-import app.guantera.sonda.domain.media.MediaCapabilities
-import app.guantera.sonda.domain.media.MediaCommand
-import app.guantera.sonda.domain.media.MediaSnapshot
-import app.guantera.sonda.domain.media.NowPlaying
-import app.guantera.sonda.domain.media.PlaybackState
+import app.guantera.sonda.domain.media.ControlDiagnostic
+import app.guantera.sonda.domain.media.ControlKind
+import app.guantera.sonda.domain.media.ControlRoute
+import app.guantera.sonda.domain.media.Effect
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -30,21 +31,42 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.TimeZone
 
+class FakeBackups : BackupActions {
+    var exportResult: ExportOutcome = ExportOutcome.Done("/pendrive/Guantera/respaldos/backup-1.json")
+    var importResult: ImportOutcome = ImportOutcome.Done(12)
+    var exports = 0
+    var imports = 0
+    var lastCopy: Long? = null
+    override suspend fun export(): ExportOutcome { exports += 1; return exportResult }
+    override suspend fun importFromDrive(): ImportOutcome { imports += 1; return importResult }
+    override suspend fun lastCopyUtcMs(): Long? = lastCopy
+}
+
 class FakeSettingsStore(private val now: Long = 0L) : SettingsStore {
     override val settings = MutableStateFlow(
         AppSettings(48_250, now - 12 * DAY, "$", false, null, now - 1000, now - 45 * DAY),
     )
-    var restored = 0
-    override fun correctOdometer(km: Int) { settings.value = settings.value.copy(odometerKm = km, odometerCalibratedAtMillis = now) }
-    override fun setCurrency(currency: String) { settings.value = settings.value.copy(currency = currency) }
-    override fun setOpenAtBoot(enabled: Boolean) { settings.value = settings.value.copy(openAtBoot = enabled) }
-    override fun restoreCatalog() { restored += 1 }
-    private companion object { const val DAY = 86_400_000L }
-}
+    override val backups = FakeBackups()
 
-class FakeMusicSource : MusicSource {
-    override val isReal = MutableStateFlow(false)
-    override fun setReal(real: Boolean) { isReal.value = real }
+    /** What the next writes answer, in order; once empty, every write is saved. */
+    val answers = ArrayDeque<FormOutcome>()
+    var restored = 0
+    var stoppedAnswers = 0
+    var refreshes = 0
+
+    private fun write(change: () -> Unit): FormOutcome {
+        val outcome = answers.removeFirstOrNull() ?: FormOutcome.Saved
+        if (outcome == FormOutcome.Saved) change()
+        return outcome
+    }
+
+    override suspend fun correctOdometer(km: Int) = write { settings.value = settings.value.copy(odometerKm = km, odometerCalibratedAtMillis = now) }
+    override suspend fun setCurrency(currency: String) = write { settings.value = settings.value.copy(currency = currency) }
+    override suspend fun setOpenAtBoot(enabled: Boolean) = write { settings.value = settings.value.copy(openAtBoot = enabled) }
+    override suspend fun restoreCatalog() = write { restored += 1 }
+    override fun confirmStopped() { stoppedAnswers += 1 }
+    override fun refreshBackupInfo() { refreshes += 1 }
+    private companion object { const val DAY = 86_400_000L }
 }
 
 class FakeDateTime(var info: DateTimeInfo = DateTimeInfo(true, true, "America/Argentina/Buenos_Aires (GMT-03:00)", true)) : DateTimeSettings {
@@ -52,24 +74,19 @@ class FakeDateTime(var info: DateTimeInfo = DateTimeInfo(true, true, "America/Ar
     override fun read(): DateTimeInfo { reads += 1; return info }
 }
 
-class MemoryModeStore(var real: Boolean = false) : MusicModeStore {
-    override fun isReal() = real
-    override fun save(real: Boolean) { this.real = real }
-}
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsPresenterTest {
     private val clock = FakeClock(now = 100 * 86_400_000L)
     private val data = FakeData()
     private val store = FakeSettingsStore(clock.now)
-    private val music = FakeMusicSource()
+    private val music = MutableStateFlow(ControlDiagnostic.Initial)
     private val dateTime = FakeDateTime()
     private val format = DisplayFormat(TimeZone.getTimeZone("UTC"))
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(UnconfinedTestDispatcher(), testBody = block)
 
     private fun TestScope.presenter() =
-        SettingsPresenter(data, FakeDemo(), store, music, dateTime, format, clock, backgroundScope).also { p ->
+        SettingsPresenter(data, store, music, dateTime, format, clock, backgroundScope).also { p ->
             backgroundScope.launch { p.state.collect {} }
         }
 
@@ -110,57 +127,107 @@ class SettingsPresenterTest {
         assertFalse(p.state.value.openAtBoot)
     }
 
-    @Test fun `restore catalog reaches the store and music choice reaches the source`() = test {
+    @Test fun `restore catalog reaches the store`() = test {
         val p = presenter()
         p.restoreCatalog()
         assertEquals(1, store.restored)
-        p.setMusicReal(true)
-        assertTrue(p.state.value.musicReal)
     }
 
-    @Test fun `unknown movement asks once and the answer lasts ten minutes`() = test {
+    @Test fun `music controls start untried and follow what the adapter reports`() = test {
         val p = presenter()
-        assertFalse(p.requiresStoppedConfirmation())
-        data.status.value = data.status.value.copy(motion = MotionStatus.Unknown)
-        assertTrue(p.requiresStoppedConfirmation())
-        p.confirmStopped()
-        assertFalse(p.requiresStoppedConfirmation())
-        clock.now += 11 * 60_000L
-        assertTrue(p.requiresStoppedConfirmation())
+        assertTrue(p.state.value.musicControls.all { it.route == null && it.effect == null })
+        assertEquals(ControlKind.entries, p.state.value.musicControls.map { it.control })
+        music.value = music.value.map {
+            if (it.control == ControlKind.PlayPause) ControlDiagnostic(it.control, ControlRoute.KeyHeadsetHook, Effect.NoEffect, listOf(ControlRoute.Transport, ControlRoute.KeyHeadsetHook)) else it
+        }
+        val play = p.state.value.musicControls.first { it.control == ControlKind.PlayPause }
+        assertEquals(ControlRoute.KeyHeadsetHook, play.route)
+        assertEquals(Effect.NoEffect, play.effect)
     }
 
-    @Test fun `switchable player follows the choice, persists it and restarts the right side`() = test {
-        val demo = FakePlayer(MediaSnapshot.Empty.copy(playback = PlaybackState.Playing))
-        val real = FakePlayer()
-        val saved = MemoryModeStore()
-        val player = SwitchableMediaPlayerControl(demo, real, saved, backgroundScope)
-        assertFalse(player.isReal.value)
-        assertEquals(PlaybackState.Playing, player.state.value.playback)
-
-        player.start()
-        player.send(MediaCommand.Next)
-        assertEquals(1, demo.commands.size)
-
-        player.setReal(true)
-        assertTrue(saved.real)
-        assertEquals(1, demo.stopCalls)
-        assertEquals(1, real.startCalls)
-        assertEquals(PlaybackState.Unknown, player.state.value.playback)
-        player.send(MediaCommand.Next)
-        assertEquals(1, real.commands.size)
-
-        real.state.value = MediaSnapshot(
-            NowPlaying("T", "A", null, "p", "App"), PlaybackState.Playing,
-            MediaCapabilities(true, true, true, true), null,
-        )
-        assertEquals("T", player.state.value.nowPlaying?.title)
-        player.stop()
-        assertEquals(1, real.stopCalls)
+    @Test fun `a change blocked for lack of confirmation asks, and goes through after yes`() = test {
+        val p = presenter()
+        store.answers += FormOutcome.NeedsConfirmation
+        p.nextCurrency()
+        assertEquals(SettingsDialog.AskStopped, p.state.value.dialog)
+        assertEquals("$", p.state.value.currency)
+        p.answerStopped(true)
+        assertEquals(1, store.stoppedAnswers)
+        assertEquals("US$", p.state.value.currency)
+        assertEquals(null, p.state.value.dialog)
     }
 
-    @Test fun `switchable player starts from the saved choice`() = test {
-        val player = SwitchableMediaPlayerControl(FakePlayer(), FakePlayer(), MemoryModeStore(real = true), backgroundScope)
-        assertTrue(player.isReal.value)
+    @Test fun `answering no drops the change and tells the domain nothing`() = test {
+        val p = presenter()
+        store.answers += FormOutcome.NeedsConfirmation
+        p.toggleOpenAtBoot()
+        p.answerStopped(false)
+        assertEquals(0, store.stoppedAnswers)
+        assertFalse(p.state.value.openAtBoot)
+        assertEquals(null, p.state.value.dialog)
+    }
+
+    @Test fun `a change blocked by movement says so and writes nothing`() = test {
+        val p = presenter()
+        store.answers += FormOutcome.CarMoving
+        p.nextCurrency()
+        assertEquals(SettingsDialog.CarMoving, p.state.value.dialog)
+        assertEquals("$", p.state.value.currency)
+        p.dismissDialog()
+        assertEquals(null, p.state.value.dialog)
+    }
+
+    @Test fun `a failed save keeps the old value and retrying writes it`() = test {
+        val p = presenter()
+        store.answers += FormOutcome.StorageFailed
+        assertEquals(OdometerResult.Saved, p.correctOdometer("50.000"))
+        assertEquals(SettingsDialog.SaveFailed(diskFull = false), p.state.value.dialog)
+        assertEquals("48.250", p.state.value.odometerText)
+        p.retryWrite()
+        assertEquals("50.000", p.state.value.odometerText)
+        assertEquals(null, p.state.value.dialog)
+    }
+
+    @Test fun `a full disk is told apart from other failures`() = test {
+        val p = presenter()
+        store.answers += FormOutcome.StorageFull
+        p.restoreCatalog()
+        assertEquals(SettingsDialog.SaveFailed(diskFull = true), p.state.value.dialog)
+    }
+
+    @Test fun `exporting reports each result and never invents success`() = test {
+        val p = presenter()
+        listOf(
+            ExportOutcome.Done("/pendrive/x.json"), ExportOutcome.CarMoving, ExportOutcome.DriveMissing,
+            ExportOutcome.DriveFull, ExportOutcome.Failed,
+        ).forEach { result ->
+            store.backups.exportResult = result
+            p.export()
+            assertEquals(SettingsDialog.ExportReport(result), p.state.value.dialog)
+            p.dismissDialog()
+        }
+        assertEquals(5, store.backups.exports)
+        assertTrue(store.refreshes >= 5)
+    }
+
+    @Test fun `importing asks first, replaces nothing without a yes, and reports each result`() = test {
+        val p = presenter()
+        p.askImport()
+        assertEquals(SettingsDialog.ConfirmImport, p.state.value.dialog)
+        assertEquals(0, store.backups.imports)
+        p.dismissDialog()
+        assertEquals(0, store.backups.imports)
+        listOf(
+            ImportOutcome.Done(340), ImportOutcome.CarMoving, ImportOutcome.DriveMissing, ImportOutcome.NoCopy,
+            ImportOutcome.Unreadable, ImportOutcome.Damaged, ImportOutcome.NewerVersion,
+            ImportOutcome.SafetyCopyFailed, ImportOutcome.StorageFailed,
+        ).forEach { result ->
+            store.backups.importResult = result
+            p.askImport()
+            p.importNewest()
+            assertEquals(SettingsDialog.ImportReport(result), p.state.value.dialog)
+            p.dismissDialog()
+        }
     }
 
     @Test fun `date and time reflects the radio's own readings`() = test {

@@ -18,7 +18,7 @@
     <dimen name="action_min_width">288dp</dimen>
     <dimen name="touch_gap">16dp</dimen>
     <dimen name="top_bar_height">64dp</dimen>
-    <dimen name="rail_width">216dp</dimen>
+    <dimen name="rail_width">256dp</dimen>
     <dimen name="icon_transport">48dp</dimen>
 
     <!-- Espaciado: regla única (diseno.md). Interno < entre piezas <= margen de pantalla. -->

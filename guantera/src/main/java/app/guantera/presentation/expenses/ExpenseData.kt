@@ -1,6 +1,7 @@
 package app.guantera.presentation.expenses
 
 import app.guantera.presentation.input.CalendarDate
+import app.guantera.presentation.port.FormOutcome
 import kotlinx.coroutines.flow.StateFlow
 
 enum class ExpenseCategory { Fuel, Maintenance, Insurance, Tolls, Parking, Washing, Other }
@@ -16,15 +17,25 @@ data class Expense(
     val serviceRecordId: Long?,
 )
 
+/** R23 and R24. [minorPerKm] is null when there are fewer than 50 km in the period. */
+data class PeriodCost(val totalMinor: Long, val km: Double, val minorPerKm: Double?)
+
 /** Boundary for P8 and P9 (CU-15 to CU-18). */
 interface ExpenseData {
     val expenses: StateFlow<List<Expense>>
 
-    /** Creates the expense when its id is 0, otherwise replaces it. Returns the id. */
-    fun save(expense: Expense): Long
+    /**
+     * The expenses dated from [from] to [to], both included. The history screen asks for the period
+     * it shows; a real source can answer from an indexed query instead of filtering everything.
+     */
+    fun expensesBetween(from: CalendarDate, to: CalendarDate): List<Expense> =
+        expenses.value.filter { it.date >= from && it.date <= to }
 
-    fun delete(id: Long)
+    /** Creates the expense when its id is 0, otherwise replaces it. */
+    suspend fun save(expense: Expense): FormOutcome
 
-    /** Kilometers of closed trips in the period, for the cost per kilometer (R23). [from] null means from the start. */
-    fun tripKilometers(from: CalendarDate?, to: CalendarDate): Double
+    suspend fun delete(id: Long): FormOutcome
+
+    /** CU-18 for the days [from] to [to], both included: the total, the km of closed trips and the cost of one km. */
+    suspend fun costPerKm(from: CalendarDate, to: CalendarDate): PeriodCost
 }

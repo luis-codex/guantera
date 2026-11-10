@@ -1,6 +1,6 @@
 package app.guantera.sonda.media
 
-import app.guantera.sonda.domain.media.MediaCommand
+import app.guantera.sonda.domain.media.ControlRoute
 import app.guantera.sonda.domain.media.NowPlaying
 import app.guantera.sonda.domain.media.PlaybackState
 import app.guantera.sonda.domain.media.VolumeCommand
@@ -10,10 +10,17 @@ import app.guantera.sonda.domain.media.VolumeState
 internal interface SessionHandle {
     fun nowPlaying(): NowPlaying
     fun playback(): PlaybackState
+
+    /**
+     * Changes whenever the session answers a command: track, position or the time of the last state update.
+     * Null when it cannot be read.
+     */
+    fun signature(): String?
     fun play()
     fun pause()
     fun next()
     fun previous()
+    fun adjustVolume(command: VolumeCommand)
 }
 
 internal sealed interface SessionRead {
@@ -30,14 +37,23 @@ internal interface SessionSource {
 }
 
 internal interface KeyDispatcher {
-    /** Returns false or throws when the key could not be delivered. */
-    fun dispatch(command: MediaCommand): Boolean
+    /** Sends the media key of a `Key*` [route]. Returns false or throws when it could not be delivered. */
+    fun dispatch(route: ControlRoute): Boolean
+}
+
+/** Whether the system hears music right now. Works without notification access. */
+internal interface AudioActivity {
+    fun isMusicActive(): Boolean
+    fun start(onChange: () -> Unit)
+    fun stop()
 }
 
 internal interface VolumeBackend {
     /** Null if unreadable. May throw. */
     fun read(): VolumeState?
-    fun adjust(command: VolumeCommand)
+
+    /** Delivers [command] by [route] (`StreamVolume`, `SuggestedVolume` or `KeyVolume`). May throw. */
+    fun adjust(route: ControlRoute, command: VolumeCommand)
     fun start(onChange: () -> Unit)
     fun stop()
 }

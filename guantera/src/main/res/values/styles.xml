@@ -106,5 +106,7 @@
         <item name="android:textSize">@dimen/text_secondary</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:maxLines">1</item>
+        <item name="android:drawableTint">@color/rail_text</item>
+        <item name="android:drawablePadding">@dimen/icon_gap_inline</item>
     </style>
     </resources>

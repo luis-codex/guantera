@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pantalla de Música: columna de controles de ancho fijo (anterior, play y siguiente + grupo de volumen). -->
+    <dimen name="music_controls_width">448dp</dimen>
+    <dimen name="music_transport_height">176dp</dimen>
+    <!-- Cajas de los íconos grandes: el glifo ocupa ~55 % de la caja, así que 112 dp dan ~64 dp de play y 96 dp ~48 dp de anterior/siguiente. -->
+    <dimen name="icon_transport_play">112dp</dimen>
+    <dimen name="icon_transport_side">96dp</dimen>
+</resources>

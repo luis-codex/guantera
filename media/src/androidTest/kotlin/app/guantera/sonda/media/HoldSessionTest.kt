@@ -47,7 +47,17 @@ class HoldSessionTest {
         track.play()
         val end = System.currentTimeMillis() + seconds * 1000
         val silence = ShortArray(2205)
-        while (System.currentTimeMillis() < end) track.write(silence, 0, silence.size)
+        // A real player stops making sound when paused; the audio check of the adapter depends on that.
+        var playing = false
+        while (System.currentTimeMillis() < end) {
+            if (state == PS.STATE_PLAYING) {
+                if (!playing) { track.play(); playing = true }
+                track.write(silence, 0, silence.size)
+            } else {
+                if (playing) { track.pause(); track.flush(); playing = false }
+                Thread.sleep(50)
+            }
+        }
         track.release(); session.release()
     }
 }

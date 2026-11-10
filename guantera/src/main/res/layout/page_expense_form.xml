@@ -97,6 +97,11 @@
         android:orientation="horizontal">
             <app.guantera.ui.components.ChoiceButton
                 android:id="@+id/catFuel"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:drawableTop="@drawable/ic_l_fuel"
+                android:drawableTint="@color/ink"
+                android:drawablePadding="@dimen/icon_gap_stacked"
                 style="@style/Control.Button.Choice"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/touch_min"
@@ -104,29 +109,44 @@
                 android:text="@string/ex_cat_fuel" />
             <app.guantera.ui.components.ChoiceButton
                 android:id="@+id/catMaintenance"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:drawableTop="@drawable/ic_l_wrench"
+                android:drawableTint="@color/ink"
+                android:drawablePadding="@dimen/icon_gap_stacked"
                 style="@style/Control.Button.Choice"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/touch_min"
                 android:layout_weight="1"
-                android:layout_marginStart="@dimen/touch_gap"
+                android:layout_marginStart="@dimen/s8"
                 android:text="@string/ex_cat_maintenance" />
             <app.guantera.ui.components.ChoiceButton
                 android:id="@+id/catInsurance"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:drawableTop="@drawable/ic_l_shield"
+                android:drawableTint="@color/ink"
+                android:drawablePadding="@dimen/icon_gap_stacked"
                 style="@style/Control.Button.Choice"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/touch_min"
                 android:layout_weight="1"
-                android:layout_marginStart="@dimen/touch_gap"
+                android:layout_marginStart="@dimen/s8"
                 android:text="@string/ex_cat_insurance" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/touch_gap"
+            android:layout_marginTop="@dimen/s8"
             android:baselineAligned="false"
         android:orientation="horizontal">
             <app.guantera.ui.components.ChoiceButton
                 android:id="@+id/catTolls"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:drawableTop="@drawable/ic_l_tolls"
+                android:drawableTint="@color/ink"
+                android:drawablePadding="@dimen/icon_gap_stacked"
                 style="@style/Control.Button.Choice"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/touch_min"
@@ -134,29 +154,44 @@
                 android:text="@string/ex_cat_tolls" />
             <app.guantera.ui.components.ChoiceButton
                 android:id="@+id/catParking"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:drawableTop="@drawable/ic_l_parking"
+                android:drawableTint="@color/ink"
+                android:drawablePadding="@dimen/icon_gap_stacked"
                 style="@style/Control.Button.Choice"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/touch_min"
                 android:layout_weight="1"
-                android:layout_marginStart="@dimen/touch_gap"
+                android:layout_marginStart="@dimen/s8"
                 android:text="@string/ex_cat_parking" />
             <app.guantera.ui.components.ChoiceButton
                 android:id="@+id/catWashing"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:drawableTop="@drawable/ic_l_washing"
+                android:drawableTint="@color/ink"
+                android:drawablePadding="@dimen/icon_gap_stacked"
                 style="@style/Control.Button.Choice"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/touch_min"
                 android:layout_weight="1"
-                android:layout_marginStart="@dimen/touch_gap"
+                android:layout_marginStart="@dimen/s8"
                 android:text="@string/ex_cat_washing" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/touch_gap"
+            android:layout_marginTop="@dimen/s8"
             android:baselineAligned="false"
         android:orientation="horizontal">
             <app.guantera.ui.components.ChoiceButton
                 android:id="@+id/catOther"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:drawableTop="@drawable/ic_l_other"
+                android:drawableTint="@color/ink"
+                android:drawablePadding="@dimen/icon_gap_stacked"
                 style="@style/Control.Button.Choice"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -168,7 +203,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:layout_marginStart="@dimen/touch_gap"
+                android:layout_marginStart="@dimen/s8"
                 app:fieldLabel="@string/ex_f_note" />
         </LinearLayout>
         </LinearLayout>
@@ -176,6 +211,6 @@
             android:id="@+id/pad"
             android:layout_width="@dimen/pad_width"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/block_gap" />
+            android:layout_marginStart="@dimen/touch_gap" />
     </LinearLayout>
 </LinearLayout>

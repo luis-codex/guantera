@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Período y vista -->
+    <string name="hs_week">Semana</string>
+    <string name="hs_month">Mes</string>
+    <string name="hs_year">Año</string>
+    <string name="hs_range">Rango</string>
+    <string name="hs_list">Lista</string>
+    <string name="hs_calendar">Calendario</string>
+    <string name="hs_from">Desde</string>
+    <string name="hs_to">Hasta</string>
+    <string name="hs_back_to_calendar">Volver al calendario</string>
+    <string name="hs_today">Hoy</string>
+    <string name="hs_this_month">Este mes</string>
+
+    <string-array name="hs_months_full">
+        <item>Enero</item><item>Febrero</item><item>Marzo</item><item>Abril</item><item>Mayo</item><item>Junio</item>
+        <item>Julio</item><item>Agosto</item><item>Septiembre</item><item>Octubre</item><item>Noviembre</item><item>Diciembre</item>
+    </string-array>
+    <string-array name="hs_months_short">
+        <item>Ene</item><item>Feb</item><item>Mar</item><item>Abr</item><item>May</item><item>Jun</item>
+        <item>Jul</item><item>Ago</item><item>Sep</item><item>Oct</item><item>Nov</item><item>Dic</item>
+    </string-array>
+    <!-- Lunes primero, como en Argentina -->
+    <string-array name="hs_weekdays_short">
+        <item>Lun</item><item>Mar</item><item>Mié</item><item>Jue</item><item>Vie</item><item>Sáb</item><item>Dom</item>
+    </string-array>
+    <string-array name="hs_weekdays_full">
+        <item>Lunes</item><item>Martes</item><item>Miércoles</item><item>Jueves</item><item>Viernes</item><item>Sábado</item><item>Domingo</item>
+    </string-array>
+
+    <!-- Nombres de período -->
+    <string name="hs_title_month">%1$s %2$d</string>
+    <string name="hs_title_week_same_month">%1$d – %2$d %3$s %4$d</string>
+    <string name="hs_title_week_cross_month">%1$d %2$s – %3$d %4$s %5$d</string>
+    <string name="hs_day_header">%1$s %2$d de %3$s</string>
+    <string name="hs_day_header_year">%1$s %2$d de %3$s de %4$d</string>
+    <string name="hs_day_header_today">Hoy · %1$s</string>
+    <string name="hs_day_header_yesterday">Ayer · %1$s</string>
+
+    <!-- Para frases como "No hay gastos en la semana del 8 al 14 de junio." -->
+    <string name="hs_in_week">la semana del %1$d al %2$d de %3$s</string>
+    <string name="hs_in_week_cross">la semana del %1$d de %2$s al %3$d de %4$s</string>
+    <string name="hs_in_month">%1$s de %2$d</string>
+    <string name="hs_in_year">%1$d</string>
+    <string name="hs_in_range">los meses de %1$s %2$d a %3$s %4$d</string>
+
+    <string name="hs_cell_description">%1$s, %2$s</string>
+    <string name="hs_cell_description_today">Hoy, %1$s, %2$s</string>
+    <string name="hs_cell_none">sin registros</string>
+    <string name="hs_week_total">Total: %1$s</string>
+    <string name="hs_row_estimated_description">%1$s, cierre estimado</string>
+    <string name="hs_duration_join">%1$s · %2$s</string>
+</resources>

@@ -1,6 +1,21 @@
 package app.guantera.presentation.trips
 
 import app.guantera.presentation.common.DisplayFormat
+import app.guantera.presentation.history.HistoryActions
+import app.guantera.presentation.history.HistoryBuilder
+import app.guantera.presentation.history.HistoryController
+import app.guantera.presentation.history.HistoryEntry
+import app.guantera.presentation.history.HistoryIcon
+import app.guantera.presentation.history.HistoryLayout
+import app.guantera.presentation.history.HistoryRowUi
+import app.guantera.presentation.history.HistoryState
+import app.guantera.presentation.history.HistoryUi
+import app.guantera.presentation.history.HistoryUnit
+import app.guantera.presentation.history.KilometerNumbers
+import app.guantera.presentation.history.PeriodKind
+import app.guantera.presentation.history.RowText
+import app.guantera.presentation.history.YearMonth
+import app.guantera.presentation.input.CalendarDate
 import app.guantera.presentation.port.GeoPoint
 import app.guantera.presentation.port.GuanteraData
 import app.guantera.presentation.port.TripClosure
@@ -23,15 +38,6 @@ sealed interface DayLabel {
     data class Date(val text: String) : DayLabel
 }
 
-data class TripRowUi(
-    val id: Long,
-    val day: DayLabel,
-    val startTimeText: String,
-    val durationMinutes: Long,
-    val kmText: String,
-    val isEstimatedClosure: Boolean,
-)
-
 data class TripDetailUi(
     val day: DayLabel,
     val kmText: String,
@@ -46,12 +52,10 @@ data class TripDetailUi(
 )
 
 data class TripsViewState(
-    val todayKmText: String,
-    val weekKmText: String,
-    val monthKmText: String,
-    val rows: List<TripRowUi>,
-    val hasMore: Boolean,
-    val isEmpty: Boolean,
+    /** The figures answer to the period shown in [history]. */
+    val periodKmText: String,
+    val periodTripsText: String,
+    val history: HistoryUi,
     /** Non-null while one trip is open (P4). */
     val detail: TripDetailUi?,
 )
@@ -59,65 +63,88 @@ data class TripsViewState(
 class TripsPresenter(
     private val data: GuanteraData,
     private val format: DisplayFormat,
-    clock: Clock,
+    private val clock: Clock,
     ticks: Flow<Long>,
     scope: CoroutineScope,
     private val zone: TimeZone = TimeZone.getDefault(),
 ) {
-    private val visibleCount = MutableStateFlow(PAGE_SIZE)
     private val selectedId = MutableStateFlow<Long?>(null)
+    private val history = HistoryController { CalendarDate.fromMillis(clock.nowMillis(), zone) }
+    private val numbers = KilometerNumbers(format)
 
-    val state: StateFlow<TripsViewState> = combine(data.trips, ticks, visibleCount, selectedId) { trips, now, visible, selected ->
-        reduce(trips, now, visible, selected)
+    val state: StateFlow<TripsViewState> = combine(data.trips, ticks, history.state, selectedId) { trips, now, view, selected ->
+        reduce(trips, now, view, selected)
     }.stateIn(
         scope,
         SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-        reduce(data.trips.value, clock.nowMillis(), PAGE_SIZE, null),
+        reduce(data.trips.value, clock.nowMillis(), history.state.value, null),
     )
 
-    fun loadMore() {
-        if (visibleCount.value < data.trips.value.size) visibleCount.value += PAGE_SIZE
+    /** Period, layout and day moves. Opening a row opens its detail (P4). */
+    val historyActions: HistoryActions = object : HistoryActions {
+        override fun selectKind(kind: PeriodKind) = history.selectKind(kind)
+        override fun selectLayout(layout: HistoryLayout) = history.selectLayout(layout)
+        override fun previousPeriod() = history.previous()
+        override fun nextPeriod() = history.next()
+        override fun openDay(date: CalendarDate) = history.openDay(date)
+        override fun closeDay() { history.closeDay() }
+        override fun openMonth(month: YearMonth) = history.openMonth(month)
+        override fun stepRangeFrom(delta: Int) = history.stepRangeFrom(delta)
+        override fun stepRangeTo(delta: Int) = history.stepRangeTo(delta)
+        override fun openRow(id: Long) = openTrip(id)
     }
 
     fun openTrip(id: Long) { selectedId.value = id }
 
-    /** Returns true if a trip was open, so that the back key closes it instead of leaving the screen. */
+    /** Returns true if something was open, so that the back key closes it instead of leaving the screen: first the trip, then the day. */
+    fun onBack(): Boolean = closeTrip() || history.closeDay()
+
+    /** Returns true if a trip was open. */
     fun closeTrip(): Boolean {
         val wasOpen = selectedId.value != null
         selectedId.value = null
         return wasOpen
     }
 
-    /** Called when the user navigates away: the next visit starts from the top of the list. */
+    /** Called when the user navigates away: the next visit starts from the current month. */
     fun reset() {
         selectedId.value = null
-        visibleCount.value = PAGE_SIZE
+        history.reset()
     }
 
-    private fun reduce(trips: List<TripRecord>, now: Long, visible: Int, selected: Long?): TripsViewState {
+    private fun reduce(trips: List<TripRecord>, now: Long, view: HistoryState, selected: Long?): TripsViewState {
         val today = startOfDay(now)
         val yesterday = shiftDays(today, -1)
+        val todayDate = CalendarDate.fromMillis(now, zone)
+        val span = view.nav.span
+        val inPeriod = data.tripsBetween(dayStart(span.from), dayStart(span.to.plusDays(1)))
+        val entries = inPeriod.map { trip ->
+            HistoryEntry(
+                date = CalendarDate.fromMillis(trip.startMillis, zone),
+                value = trip.distanceKm,
+                row = HistoryRowUi(
+                    id = trip.id,
+                    icon = HistoryIcon.Trip,
+                    title = RowText.TripTimes(format.clock(trip.startMillis), durationMinutes(trip)),
+                    meta = null,
+                    valueText = format.oneDecimal(trip.distanceKm),
+                    estimated = trip.closure == TripClosure.Recovered,
+                ),
+            )
+        }
         return TripsViewState(
-            todayKmText = format.oneDecimal(kmSince(trips, today)),
-            weekKmText = format.whole(kmSince(trips, startOfWeek(now)).roundToInt()),
-            monthKmText = format.whole(kmSince(trips, startOfMonth(now)).roundToInt()),
-            rows = trips.take(visible).map { toRow(it, today, yesterday) },
-            hasMore = visible < trips.size,
-            isEmpty = trips.isEmpty(),
+            periodKmText = format.whole(inPeriod.sumOf { it.distanceKm }.roundToInt()),
+            periodTripsText = format.whole(inPeriod.size),
+            history = HistoryBuilder.build(view, todayDate, entries, HistoryUnit.Kilometers, numbers),
             detail = selected?.let { id -> trips.firstOrNull { it.id == id } }?.let { toDetail(it, today, yesterday) },
         )
     }
 
-    private fun kmSince(trips: List<TripRecord>, from: Long) = trips.filter { it.startMillis >= from }.sumOf { it.distanceKm }
-
-    private fun toRow(trip: TripRecord, today: Long, yesterday: Long) = TripRowUi(
-        id = trip.id,
-        day = dayLabel(trip.startMillis, today, yesterday),
-        startTimeText = format.clock(trip.startMillis),
-        durationMinutes = durationMinutes(trip),
-        kmText = format.oneDecimal(trip.distanceKm),
-        isEstimatedClosure = trip.closure == TripClosure.Recovered,
-    )
+    /** Midnight at the start of [date], in the presenter's zone. */
+    private fun dayStart(date: CalendarDate): Long = Calendar.getInstance(zone).apply {
+        clear()
+        set(date.year, date.month - 1, date.day, 0, 0, 0)
+    }.timeInMillis
 
     private fun toDetail(trip: TripRecord, today: Long, yesterday: Long) = TripDetailUi(
         day = dayLabel(trip.startMillis, today, yesterday),
@@ -159,17 +186,7 @@ class TripsPresenter(
 
     private fun shiftDays(dayStart: Long, days: Int) = calendarAt(dayStart).apply { add(Calendar.DAY_OF_YEAR, days) }.timeInMillis
 
-    /** Weeks start on Monday, as they do in Argentina. */
-    private fun startOfWeek(millis: Long) = calendarAt(millis).apply {
-        val sinceMonday = (get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + DAYS_PER_WEEK) % DAYS_PER_WEEK
-        add(Calendar.DAY_OF_YEAR, -sinceMonday)
-    }.timeInMillis
-
-    private fun startOfMonth(millis: Long) = calendarAt(millis).apply { set(Calendar.DAY_OF_MONTH, 1) }.timeInMillis
-
     private companion object {
-        const val PAGE_SIZE = 20
-        const val DAYS_PER_WEEK = 7
         const val MINUTE_MILLIS = 60_000L
         const val HOUR_MILLIS = 3_600_000L
         const val STOP_TIMEOUT_MILLIS = 5_000L

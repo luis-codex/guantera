@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 
 enum class HomeVerdict { AllGood, ServiceOverdue, ServiceSoon, NeedsAttention }
 
-enum class NoticeAction { None, OpenSettings, OpenLocationSettings }
+enum class NoticeAction { None, OpenSettings, OpenLocationSettings, GrantLocation }
 
 data class NoticeUi(val notice: AppNotice, val action: NoticeAction)
 
@@ -40,7 +40,7 @@ data class HomeViewState(
 )
 
 class HomePresenter(
-    data: GuanteraData,
+    private val data: GuanteraData,
     private val playback: PlaybackActions,
     private val format: DisplayFormat,
     clock: Clock,
@@ -54,6 +54,11 @@ class HomePresenter(
         SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
         reduce(data.home.value, playback.current, clock.nowMillis()),
     )
+
+    /** The banner was touched. "Registro interrumpido" closes when touched (especificación, sección 6). */
+    fun noticeTouched(notice: AppNotice) {
+        if (notice == AppNotice.RecordingGap) data.dismissRecordingGap()
+    }
 
     fun previous() = playback.previous()
     fun playPause() = playback.playPause()
@@ -88,8 +93,8 @@ class HomePresenter(
 
     private fun actionOf(notice: AppNotice): NoticeAction = when (notice) {
         AppNotice.GpsOff -> NoticeAction.OpenLocationSettings
-        AppNotice.NoLocationPermission, AppNotice.OdometerMissing,
-        AppNotice.RecordingGap, AppNotice.ExportOverdue -> NoticeAction.OpenSettings
+        AppNotice.NoLocationPermission -> NoticeAction.GrantLocation
+        AppNotice.OdometerMissing, AppNotice.RecordingGap, AppNotice.ExportOverdue -> NoticeAction.OpenSettings
         AppNotice.UntrustedClock, AppNotice.SearchingGps, AppNotice.StorageFull -> NoticeAction.None
     }
 

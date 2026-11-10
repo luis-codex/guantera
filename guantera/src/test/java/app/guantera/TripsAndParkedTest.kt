@@ -9,13 +9,18 @@ import app.guantera.presentation.port.GeoPoint
 import app.guantera.presentation.port.GpsStatus
 import app.guantera.presentation.port.MotionStatus
 import app.guantera.presentation.port.ParkingDetail
+import app.guantera.presentation.port.FormOutcome
 import app.guantera.presentation.port.SaveSpotResult
 import app.guantera.presentation.port.TripClosure
 import app.guantera.presentation.port.TripRecord
 import app.guantera.presentation.port.VehicleStatus
-import app.guantera.presentation.trips.DayLabel
+import app.guantera.presentation.history.HistoryBody
+import app.guantera.presentation.history.HistoryIcon
+import app.guantera.presentation.history.HistoryLayout
+import app.guantera.presentation.history.PeriodKind
+import app.guantera.presentation.history.RowText
+import app.guantera.presentation.input.CalendarDate
 import app.guantera.presentation.trips.TripsPresenter
-import app.guantera.sample.SampleData
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
@@ -75,7 +80,9 @@ class TripsAndParkedTest {
 
     private fun spot(note: String? = "Piso 2") = ParkingDetail(noon - 135 * 60_000, here, 6, note, false)
 
-    @Test fun `totals split by today, Monday-based week and calendar month`() = test {
+    private fun TripsPresenter.groups() = (state.value.history.body as HistoryBody.Timeline).groups
+
+    @Test fun `the figures follow the period, month by default, then week and year`() = test {
         data.trips.value = listOf(
             trip(1, at(11), km = 1.5),
             trip(2, at(9), km = 10.0), // Monday of this week
@@ -83,18 +90,25 @@ class TripsAndParkedTest {
             trip(4, at(1), km = 1000.0), // this month
             trip(5, at(31, Calendar.OCTOBER), km = 5000.0),
         )
-        val state = trips().state.value
-        assertEquals("1,5", state.todayKmText)
-        assertEquals("12", state.weekKmText)
-        assertEquals("1.112", state.monthKmText)
+        val presenter = trips()
+        assertEquals("1.112", presenter.state.value.periodKmText)
+        assertEquals("4", presenter.state.value.periodTripsText)
+        presenter.historyActions.selectKind(PeriodKind.Week)
+        assertEquals("12", presenter.state.value.periodKmText)
+        assertEquals("2", presenter.state.value.periodTripsText)
+        presenter.historyActions.selectKind(PeriodKind.Year)
+        assertEquals("6.112", presenter.state.value.periodKmText)
+        assertEquals("5", presenter.state.value.periodTripsText)
     }
 
-    @Test fun `rows say today, yesterday or the date`() = test {
-        data.trips.value = listOf(trip(1, at(11)), trip(2, at(10)), trip(3, at(9)))
-        val rows = trips().state.value.rows
-        assertEquals(DayLabel.Today, rows[0].day)
-        assertEquals(DayLabel.Yesterday, rows[1].day)
-        assertEquals(DayLabel.Date("Lun 9 nov"), rows[2].day)
+    @Test fun `the timeline groups trips by day, newest day first, with the day's total`() = test {
+        data.trips.value = listOf(trip(1, at(11, hour = 14), km = 2.0), trip(2, at(11), km = 3.5), trip(3, at(9), km = 4.0))
+        val groups = trips().groups()
+        assertEquals(listOf(CalendarDate(2026, 11, 11), CalendarDate(2026, 11, 9)), groups.map { it.date })
+        assertEquals(listOf("5,5", "4,0"), groups.map { it.totalText })
+        assertEquals(listOf(1L, 2L), groups.first().rows.map { it.id })
+        assertEquals(HistoryIcon.Trip, groups.first().rows.first().icon)
+        assertEquals(RowText.TripTimes("14:00", 30), groups.first().rows.first().title)
     }
 
     @Test fun `only recovered trips are marked as estimated`() = test {
@@ -103,28 +117,44 @@ class TripsAndParkedTest {
             trip(2, at(10), closure = TripClosure.Manual),
             trip(3, at(9), closure = TripClosure.Automatic),
         )
-        assertEquals(listOf(true, false, false), trips().state.value.rows.map { it.isEstimatedClosure })
+        assertEquals(listOf(true, false, false), trips().groups().flatMap { it.rows }.map { it.estimated })
     }
 
     @Test fun `no trips is reported as empty with zero totals`() = test {
         val state = trips().state.value
-        assertTrue(state.isEmpty)
-        assertEquals("0,0", state.todayKmText)
-        assertFalse(state.hasMore)
+        assertTrue(state.history.isEmpty)
+        assertEquals("0", state.periodKmText)
+        assertEquals("0", state.periodTripsText)
     }
 
-    @Test fun `the list grows one page at a time until it is complete`() = test {
-        data.trips.value = (1L..45L).map { trip(it, at(1) + it) }
+    @Test fun `a trip belongs to the day it started, and the period edges are exact`() = test {
+        data.trips.value = listOf(
+            trip(1, at(1, hour = 0)), // first instant of the month
+            trip(2, at(30, Calendar.NOVEMBER, hour = 23)), // last evening of the month
+            trip(3, at(1, Calendar.DECEMBER, hour = 0)), // next month
+            trip(4, at(31, Calendar.OCTOBER, hour = 23)), // previous month
+        )
         val presenter = trips()
-        assertEquals(20, presenter.state.value.rows.size)
-        assertTrue(presenter.state.value.hasMore)
-        presenter.loadMore()
-        assertEquals(40, presenter.state.value.rows.size)
-        presenter.loadMore()
-        assertEquals(45, presenter.state.value.rows.size)
-        assertFalse(presenter.state.value.hasMore)
-        presenter.loadMore()
-        assertEquals(45, presenter.state.value.rows.size)
+        // The sample day is the 11th, so the 30th is still shown: the period is the whole month, not up to today.
+        assertEquals(listOf(2L, 1L), presenter.groups().flatMap { it.rows }.map { it.id })
+        presenter.historyActions.previousPeriod()
+        assertEquals(listOf(4L), presenter.groups().flatMap { it.rows }.map { it.id })
+    }
+
+    @Test fun `the calendar of a month marks the days with trips and today`() = test {
+        data.trips.value = listOf(trip(1, at(11), km = 20.0), trip(2, at(11, hour = 15), km = 16.4), trip(3, at(3), km = 7.0))
+        val presenter = trips()
+        presenter.historyActions.selectLayout(HistoryLayout.Calendar)
+        val cells = (presenter.state.value.history.body as HistoryBody.MonthGrid).cells
+        // 1 November 2026 is a Sunday: six empty cells first, 30 days, then six more to finish the sixth week.
+        assertEquals(6, cells.takeWhile { it == null }.size)
+        assertEquals(42, cells.size)
+        val days = cells.filterNotNull()
+        assertEquals(30, days.size)
+        assertEquals(listOf(3, 11), days.filter { it.count > 0 }.map { it.date.day })
+        assertEquals("36", days.single { it.date.day == 11 }.totalText)
+        assertEquals(2, days.single { it.date.day == 11 }.count)
+        assertEquals(listOf(11), days.filter { it.isToday }.map { it.date.day })
     }
 
     @Test fun `opening a trip gives its detail and the back action closes it`() = test {
@@ -151,14 +181,24 @@ class TripsAndParkedTest {
         assertNull(presenter.state.value.detail!!.averageSpeedText)
     }
 
-    @Test fun `leaving the screen closes the trip and rewinds the list`() = test {
-        data.trips.value = (1L..45L).map { trip(it, at(1) + it) }
+    @Test fun `back closes the trip first, then an open day, and leaving rewinds everything`() = test {
+        data.trips.value = listOf(trip(1, at(11)))
         val presenter = trips()
-        presenter.loadMore()
+        presenter.historyActions.selectLayout(HistoryLayout.Calendar)
+        presenter.historyActions.openDay(CalendarDate(2026, 11, 11))
+        presenter.openTrip(1)
+        assertTrue(presenter.onBack())
+        assertNull(presenter.state.value.detail)
+        assertTrue(presenter.state.value.history.body is HistoryBody.OpenDay)
+        assertTrue(presenter.onBack())
+        assertTrue(presenter.state.value.history.body is HistoryBody.MonthGrid)
+        assertFalse(presenter.onBack())
+        presenter.historyActions.selectKind(PeriodKind.Year)
         presenter.openTrip(1)
         presenter.reset()
         assertNull(presenter.state.value.detail)
-        assertEquals(20, presenter.state.value.rows.size)
+        assertEquals(PeriodKind.Month, presenter.state.value.history.kind)
+        assertEquals(HistoryLayout.List, presenter.state.value.history.layout)
     }
 
     @Test fun `a saved spot shows age, accuracy and the map link`() = test {
@@ -179,6 +219,57 @@ class TripsAndParkedTest {
         val presenter = parked()
         presenter.saveHere()
         assertEquals(ParkedError.NoFix, presenter.state.value.error)
+    }
+
+    @Test fun `saving here that needs the confirmation asks first and saves after yes`() = test {
+        data.saveSpotResult = SaveSpotResult.NeedsConfirmation
+        val presenter = parked()
+        presenter.saveHere()
+        assertTrue(presenter.state.value.askIfStopped)
+        data.saveSpotResult = SaveSpotResult.Saved
+        presenter.confirmStopped()
+        assertEquals(1, data.stoppedConfirmations)
+        assertFalse(presenter.state.value.askIfStopped)
+        assertEquals(2, data.savedSpots)
+    }
+
+    @Test fun `saving here with the car moving or a failing disk says so`() = test {
+        val presenter = parked()
+        data.saveSpotResult = SaveSpotResult.CarMoving
+        presenter.saveHere()
+        assertEquals(ParkedError.Moving, presenter.state.value.error)
+        data.saveSpotResult = SaveSpotResult.Failed
+        presenter.saveHere()
+        assertEquals(ParkedError.SaveFailed, presenter.state.value.error)
+    }
+
+    @Test fun `a note blocked by the domain keeps the draft, and goes through after yes`() = test {
+        data.parkingSpot.value = spot("Piso 2")
+        val presenter = parked()
+        presenter.editNote()
+        presenter.onDraftChanged("Piso 3")
+        data.noteOutcome = FormOutcome.NeedsConfirmation
+        presenter.saveNote()
+        assertTrue(presenter.state.value.askIfStopped)
+        assertTrue(presenter.state.value.isEditingNote)
+        assertEquals("Piso 3", presenter.state.value.draft)
+        data.noteOutcome = FormOutcome.Saved
+        presenter.confirmStopped()
+        assertEquals(listOf("Piso 3", "Piso 3"), data.savedNotes)
+        assertFalse(presenter.state.value.isEditingNote)
+    }
+
+    @Test fun `a note that cannot be saved stays in the editor with the error`() = test {
+        data.parkingSpot.value = spot("Piso 2")
+        val presenter = parked()
+        presenter.editNote()
+        data.noteOutcome = FormOutcome.StorageFailed
+        presenter.saveNote()
+        assertTrue(presenter.state.value.isEditingNote)
+        assertEquals(ParkedError.SaveFailed, presenter.state.value.error)
+        data.noteOutcome = FormOutcome.CarMoving
+        presenter.saveNote()
+        assertEquals(ParkedError.Moving, presenter.state.value.error)
     }
 
     @Test fun `a later successful save clears the error`() = test {
@@ -300,60 +391,6 @@ class TripsAndParkedTest {
         }
         val source = PlanarYUVLuminanceSource(pixels, side, side, 0, 0, side, side, false)
         return QRCodeReader().decode(BinaryBitmap(HybridBinarizer(source))).text
-    }
-
-    @Test fun `sample today adds up to what Inicio shows, at any hour`() = test {
-        val zone = utc
-        listOf(0, 1, 7, 13, 23).forEach { hour ->
-            val now = at(11, hour = hour) + 30 * 60_000
-            val sample = SampleData(FakeClock(now), backgroundScope, zone)
-            val midnight = at(11, hour = 0)
-            val today = sample.trips.value.filter { it.startMillis >= midnight }
-            assertEquals("hora $hour", sample.home.value.today.tripCount, today.size)
-            assertEquals("hora $hour", sample.home.value.today.kilometers, today.sumOf { it.distanceKm }, 0.001)
-            assertTrue(today.all { it.endMillis <= now })
-        }
-    }
-
-    @Test fun `sample ids are unique and the list is newest first`() = test {
-        val trips = SampleData(FakeClock(noon), backgroundScope, utc).trips.value
-        assertEquals(trips.size, trips.map { it.id }.toSet().size)
-        assertEquals(trips.sortedByDescending { it.startMillis }, trips)
-        assertTrue(trips.size > 40)
-        assertTrue(trips.any { it.closure == TripClosure.Recovered })
-    }
-
-    @Test fun `sample saving here replaces the spot and updates Inicio`() = test {
-        val sample = SampleData(clock, backgroundScope, utc)
-        assertEquals(SaveSpotResult.Saved, sample.saveSpotHere())
-        assertEquals(noon, sample.parkingSpot.value!!.savedAtMillis)
-        assertEquals(noon, sample.home.value.parked!!.savedAtMillis)
-        assertNull(sample.parkingSpot.value!!.note)
-    }
-
-    @Test fun `sample cannot save while moving`() = test {
-        val sample = SampleData(clock, backgroundScope, utc)
-        sample.startSimulatedTrip()
-        assertEquals(SaveSpotResult.CarMoving, sample.saveSpotHere())
-    }
-
-    @Test fun `sample trims notes and treats blank as no note`() = test {
-        val sample = SampleData(clock, backgroundScope, utc)
-        sample.saveSpotNote("  Piso 5 ")
-        assertEquals("Piso 5", sample.parkingSpot.value!!.note)
-        assertEquals("Piso 5", sample.home.value.parked!!.note)
-        sample.saveSpotNote("   ")
-        assertNull(sample.parkingSpot.value!!.note)
-    }
-
-    @Test fun `ya estacione adds a trip at the top of the list`() = test {
-        val sample = SampleData(clock, backgroundScope, utc)
-        val before = sample.trips.value.size
-        sample.startSimulatedTrip()
-        sample.confirmParked()
-        assertEquals(before + 1, sample.trips.value.size)
-        assertEquals(TripClosure.Manual, sample.trips.value.first().closure)
-        assertNotNull(sample.parkingSpot.value)
     }
 
     private companion object {

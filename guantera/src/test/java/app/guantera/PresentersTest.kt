@@ -20,6 +20,8 @@ import app.guantera.presentation.port.TodaySummary
 import app.guantera.presentation.settings.SettingsPresenter
 import app.guantera.presentation.shell.Destination
 import app.guantera.presentation.shell.ShellPresenter
+import app.guantera.sonda.domain.media.ControlDiagnostic
+import app.guantera.sonda.domain.media.ControlKind
 import app.guantera.sonda.domain.media.MediaCapabilities
 import app.guantera.sonda.domain.media.MediaCommand
 import app.guantera.sonda.domain.media.MediaSnapshot
@@ -27,6 +29,8 @@ import app.guantera.sonda.domain.media.NowPlaying
 import app.guantera.sonda.domain.media.PlaybackState
 import app.guantera.sonda.domain.media.VolumeCommand
 import app.guantera.sonda.domain.media.VolumeState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -46,9 +50,8 @@ class PresentersTest {
     private val clock = FakeClock()
     private val ticks = MutableStateFlow(0L)
     private val data = FakeData()
-    private val demo = FakeDemo()
     private val player = FakePlayer()
-    private val actions = PlaybackActions(player)
+    private val actions = PlaybackActions(player, CoroutineScope(Dispatchers.Unconfined))
     private val urgent = MaintenanceAlert("Aceite", MaintenanceLevel.Overdue, Remaining.Km(1_350))
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(UnconfinedTestDispatcher(), testBody = block)
@@ -61,13 +64,13 @@ class PresentersTest {
         backgroundScope.launch { p.state.collect {} }
     }
 
-    private fun TestScope.driving(controls: FakeDemo? = demo) =
-        DrivingPresenter(data, controls, actions, format, backgroundScope).also { p ->
+    private fun TestScope.driving() =
+        DrivingPresenter(data, actions, format, backgroundScope).also { p ->
             backgroundScope.launch { p.state.collect {} }
         }
 
-    private fun trip(km: Double = 12.0, seconds: Long = 0, stopping: Long? = null, simulated: Boolean = false) =
-        DrivingData(km, seconds, stopping, null, simulated)
+    private fun trip(km: Double = 12.0, seconds: Long = 0, stopping: Long? = null) =
+        DrivingData(km, seconds, stopping, null)
 
     private fun homeData(
         alert: MaintenanceAlert? = null,
@@ -110,6 +113,33 @@ class PresentersTest {
     @Test fun `a notice nobody can act on has no action`() = test {
         data.home.value = homeData(notices = listOf(AppNotice.SearchingGps))
         assertEquals(NoticeAction.None, home().state.value.notice!!.action)
+    }
+
+    @Test fun `every banner of the specification offers its own action`() = test {
+        val expected = mapOf(
+            AppNotice.NoLocationPermission to NoticeAction.GrantLocation,
+            AppNotice.GpsOff to NoticeAction.OpenLocationSettings,
+            AppNotice.UntrustedClock to NoticeAction.None,
+            AppNotice.SearchingGps to NoticeAction.None,
+            AppNotice.OdometerMissing to NoticeAction.OpenSettings,
+            AppNotice.RecordingGap to NoticeAction.OpenSettings,
+            AppNotice.StorageFull to NoticeAction.None,
+            AppNotice.ExportOverdue to NoticeAction.OpenSettings,
+        )
+        assertEquals(AppNotice.entries.toSet(), expected.keys)
+        expected.forEach { (notice, action) ->
+            data.home.value = homeData(notices = listOf(notice))
+            assertEquals(notice.name, action, home().state.value.notice!!.action)
+        }
+    }
+
+    @Test fun `touching the recording gap banner closes it, and no other banner does`() = test {
+        val presenter = home()
+        presenter.noticeTouched(AppNotice.OdometerMissing)
+        presenter.noticeTouched(AppNotice.ExportOverdue)
+        assertEquals(0, data.gapDismissals)
+        presenter.noticeTouched(AppNotice.RecordingGap)
+        assertEquals(1, data.gapDismissals)
     }
 
     @Test fun `maintenance distance carries the thousands separator`() = test {
@@ -174,16 +204,6 @@ class PresentersTest {
         assertTrue(presenter.state.value.showParkedButton)
     }
 
-    @Test fun `end simulation is offered only on simulated trips`() = test {
-        data.driving.value = trip(simulated = false)
-        val presenter = driving()
-        assertFalse(presenter.state.value.showEndSimulation)
-        data.driving.value = trip(simulated = true)
-        assertTrue(presenter.state.value.showEndSimulation)
-        presenter.endSimulation()
-        assertEquals(1, demo.stopped)
-    }
-
     @Test fun `confirming parked reaches the data source`() = test {
         data.driving.value = trip(stopping = 30)
         driving().confirmParked()
@@ -202,10 +222,18 @@ class PresentersTest {
         backgroundScope.launch { presenter.state.collect {} }
         player.failing = true
         presenter.next()
-        assertTrue(presenter.state.value.playback.commandFailed)
+        assertEquals(ControlKind.Next, presenter.state.value.playback.failedControl)
         player.failing = false
         presenter.next()
-        assertFalse(presenter.state.value.playback.commandFailed)
+        assertNull(presenter.state.value.playback.failedControl)
+    }
+
+    @Test fun `an unknown volume is null, never an invented percentage`() = test {
+        player.state.value = MediaSnapshot.Empty.copy(volume = null)
+        val presenter = MusicPresenter(actions, backgroundScope)
+        backgroundScope.launch { presenter.state.collect {} }
+        assertNull(presenter.state.value.playback.volumePercent)
+        assertNull(presenter.state.value.playback.title)
     }
 
     @Test fun `music explains how to read the track when access is missing`() = test {
@@ -246,12 +274,11 @@ class PresentersTest {
         assertEquals(listOf(VolumeCommand.ToggleMute), player.volumes)
     }
 
-    @Test fun `shell starts on home and shows the sample label and time`() = test {
+    @Test fun `shell starts on home and shows the time`() = test {
         val presenter = shell()
         ticks.value = 90 * 60_000L
         val state = presenter.state.value
         assertEquals(Destination.Home, state.destination)
-        assertTrue(state.showSampleLabel)
         assertEquals("01:30", state.clockText)
     }
 
@@ -302,19 +329,13 @@ class PresentersTest {
         assertEquals(1, player.stopCalls)
     }
 
-    @Test fun `settings formats the odometer and starts the simulation`() = test {
-        val presenter = SettingsPresenter(data, demo, FakeSettingsStore(), FakeMusicSource(), FakeDateTime(), format, clock, backgroundScope)
+    @Test fun `settings formats the odometer and says when it was never entered`() = test {
+        val store = FakeSettingsStore()
+        val presenter = SettingsPresenter(data, store, MutableStateFlow(ControlDiagnostic.Initial), FakeDateTime(), format, clock, backgroundScope)
         backgroundScope.launch { presenter.state.collect {} }
         assertEquals("48.250", presenter.state.value.odometerText)
-        assertTrue(presenter.state.value.showDemo)
-        presenter.simulateTrip()
-        assertEquals(1, demo.started)
-    }
-
-    @Test fun `settings hides the demonstration when there is none`() = test {
-        val presenter = SettingsPresenter(data, null, FakeSettingsStore(), FakeMusicSource(), FakeDateTime(), format, clock, backgroundScope)
-        backgroundScope.launch { presenter.state.collect {} }
-        assertFalse(presenter.state.value.showDemo)
+        store.settings.value = store.settings.value.copy(odometerKm = null)
+        assertEquals(null, presenter.state.value.odometerText)
     }
 
     @Test fun `moving status passes through to the top bar`() = test {

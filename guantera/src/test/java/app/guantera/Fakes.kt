@@ -1,7 +1,7 @@
 package app.guantera
 
-import app.guantera.presentation.port.DemoControls
 import app.guantera.presentation.port.DrivingData
+import app.guantera.presentation.port.FormOutcome
 import app.guantera.presentation.port.GpsStatus
 import app.guantera.presentation.port.GuanteraData
 import app.guantera.presentation.port.HomeData
@@ -12,9 +12,12 @@ import app.guantera.presentation.port.TodaySummary
 import app.guantera.presentation.port.TripRecord
 import app.guantera.presentation.port.VehicleProfile
 import app.guantera.presentation.port.VehicleStatus
-import app.guantera.sonda.domain.media.ControlChannel
+import app.guantera.sonda.domain.media.ControlDiagnostic
 import app.guantera.sonda.domain.media.ControlFailure
+import app.guantera.sonda.domain.media.ControlKind
 import app.guantera.sonda.domain.media.ControlResult
+import app.guantera.sonda.domain.media.ControlRoute
+import app.guantera.sonda.domain.media.Effect
 import app.guantera.sonda.domain.media.MediaCommand
 import app.guantera.sonda.domain.media.MediaPlayerControl
 import app.guantera.sonda.domain.media.MediaSnapshot
@@ -29,7 +32,6 @@ class FakeClock(var now: Long = 0L) : Clock {
 }
 
 class FakeData : GuanteraData {
-    override val isSample = true
     override val status = MutableStateFlow(VehicleStatus(GpsStatus.Good, MotionStatus.Stopped))
     override val home = MutableStateFlow(HomeData(TodaySummary(0.0, 0), null, null, emptyList()))
     override val profile = MutableStateFlow(VehicleProfile("Auto", 1_000, "$"))
@@ -40,20 +42,20 @@ class FakeData : GuanteraData {
     var saveSpotResult = SaveSpotResult.Saved
     var savedSpots = 0
     val savedNotes = mutableListOf<String>()
+    var stoppedConfirmations = 0
+    var gapDismissals = 0
+    var noteOutcome: FormOutcome = FormOutcome.Saved
     override fun confirmParked() { parkedConfirmations += 1 }
-    override fun saveSpotHere(): SaveSpotResult { savedSpots += 1; return saveSpotResult }
-    override fun saveSpotNote(note: String) { savedNotes += note }
+    override fun confirmStopped() { stoppedConfirmations += 1 }
+    override fun dismissRecordingGap() { gapDismissals += 1 }
+    override suspend fun saveSpotHere(): SaveSpotResult { savedSpots += 1; return saveSpotResult }
+    override suspend fun saveSpotNote(note: String): FormOutcome { savedNotes += note; return noteOutcome }
 }
 
-class FakeDemo : DemoControls {
-    var started = 0
-    var stopped = 0
-    override fun startSimulatedTrip() { started += 1 }
-    override fun stopSimulatedTrip() { stopped += 1 }
-}
-
+/** Test-only player. Records commands; with [failing] every command reports that it had no effect. */
 class FakePlayer(initial: MediaSnapshot = MediaSnapshot.Empty) : MediaPlayerControl {
     override val state = MutableStateFlow(initial)
+    override val diagnostics = MutableStateFlow(ControlDiagnostic.Initial)
     val commands = mutableListOf<MediaCommand>()
     val volumes = mutableListOf<VolumeCommand>()
     var failing = false
@@ -65,16 +67,29 @@ class FakePlayer(initial: MediaSnapshot = MediaSnapshot.Empty) : MediaPlayerCont
     override fun stop() { stopCalls += 1 }
     override fun refresh() { refreshCalls += 1 }
 
-    override fun send(command: MediaCommand): ControlResult {
+    override suspend fun send(command: MediaCommand): ControlResult {
         commands += command
-        return result(ControlChannel.Session)
+        return result(
+            when (command) {
+                MediaCommand.PlayPause -> ControlKind.PlayPause
+                MediaCommand.Next -> ControlKind.Next
+                MediaCommand.Previous -> ControlKind.Previous
+            },
+        )
     }
 
-    override fun adjustVolume(command: VolumeCommand): ControlResult {
+    override suspend fun adjustVolume(command: VolumeCommand): ControlResult {
         volumes += command
-        return result(ControlChannel.Volume)
+        return result(
+            when (command) {
+                VolumeCommand.Up -> ControlKind.VolumeUp
+                VolumeCommand.Down -> ControlKind.VolumeDown
+                VolumeCommand.ToggleMute -> ControlKind.Mute
+            },
+        )
     }
 
-    private fun result(channel: ControlChannel): ControlResult =
-        if (failing) ControlResult.Failed(ControlFailure.NoChannelAvailable) else ControlResult.Done(channel)
+    private fun result(kind: ControlKind): ControlResult =
+        if (failing) ControlResult.Failed(kind, ControlFailure.NoEffect)
+        else ControlResult.Done(kind, ControlRoute.Transport, Effect.Confirmed)
 }

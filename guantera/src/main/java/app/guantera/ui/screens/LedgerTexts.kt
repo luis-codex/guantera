@@ -22,6 +22,9 @@ fun Context.errorText(error: FormError): String = getString(
         FormError.NewDueTooEarly -> R.string.er_new_due_early
         FormError.CategoryRequired -> R.string.er_category
         FormError.AmountRequired -> R.string.er_amount
+        FormError.SaveFailed -> R.string.er_save_failed
+        FormError.SaveFull -> R.string.er_save_full
+        FormError.CarMoving -> R.string.er_car_moving
     },
 )
 

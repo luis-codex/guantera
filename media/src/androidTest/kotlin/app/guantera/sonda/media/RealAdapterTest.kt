@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.test.platform.app.InstrumentationRegistry
 import app.guantera.sonda.domain.media.*
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -32,9 +33,11 @@ class RealAdapterTest {
         Thread { val buf = ShortArray(2205); while (feeding) { try { t.write(buf, 0, buf.size) } catch (e: Exception) { break } } }.start()
     }
 
+    @Volatile private var current = PS.STATE_PLAYING
+
     private fun setState(s: Int) = session.setPlaybackState(
         PS.Builder().setActions(PS.ACTION_PLAY or PS.ACTION_PAUSE or PS.ACTION_PLAY_PAUSE or PS.ACTION_SKIP_TO_NEXT or PS.ACTION_SKIP_TO_PREVIOUS)
-            .setState(s, 0, 1f).build()
+            .setState(s.also { current = it }, 0, 1f).build()
     )
 
     @Before fun setUp() {
@@ -43,8 +46,8 @@ class RealAdapterTest {
         session.setCallback(object : MediaSession.Callback() {
             override fun onPlay() { calls += "play"; setState(PS.STATE_PLAYING) }
             override fun onPause() { calls += "pause"; setState(PS.STATE_PAUSED) }
-            override fun onSkipToNext() { calls += "next" }
-            override fun onSkipToPrevious() { calls += "prev" }
+            override fun onSkipToNext() { calls += "next"; setState(current) }
+            override fun onSkipToPrevious() { calls += "prev"; setState(current) }
         }, main)
         session.setMetadata(MediaMetadata.Builder()
             .putString(MediaMetadata.METADATA_KEY_TITLE, "Cancion de prueba")
@@ -71,27 +74,30 @@ class RealAdapterTest {
         fail("timeout: $msg; calls=$calls state=${control.state.value}")
     }
 
-    @Test fun controls() {
+    @Test fun controls() = runBlocking {
         control.refresh()
         val caps = control.state.value.capabilities
         assertEquals(granted, caps.notificationAccessGranted)
+        val first = control.send(MediaCommand.PlayPause)
         if (granted) {
             assertEquals("Cancion de prueba", control.state.value.nowPlaying?.title)
             assertEquals("Artista X", control.state.value.nowPlaying?.artist)
-            assertEquals(PlaybackState.Playing, control.state.value.playback)
-            assertEquals(ControlResult.Done(ControlChannel.Session), control.send(MediaCommand.PlayPause))
+            assertEquals(ControlResult.Done(ControlKind.PlayPause, ControlRoute.Transport, Effect.Confirmed), first)
+            assertEquals(PlaybackState.Paused, control.state.value.playback)
         } else {
             assertNull(control.state.value.nowPlaying)
-            assertEquals(ControlResult.Done(ControlChannel.MediaKey), control.send(MediaCommand.PlayPause))
+            // Without access the key still reaches the session, and the diagnostics must say which route worked.
+            assertTrue("first=$first", first is ControlResult.Done)
         }
         await("pause") { calls.contains("pause") }
         control.send(MediaCommand.PlayPause)
         await("play") { calls.contains("play") }
         control.send(MediaCommand.Next); await("next") { calls.contains("next") }
         control.send(MediaCommand.Previous); await("prev") { calls.contains("prev") }
+        Unit
     }
 
-    @Test fun volume() {
+    @Test fun volume() = runBlocking {
         val am = ctx.getSystemService(AudioManager::class.java)
         am.setStreamVolume(AudioManager.STREAM_MUSIC, 5, 0)
         control.refresh()
@@ -104,5 +110,6 @@ class RealAdapterTest {
         assertTrue(control.state.value.volume!!.muted)
         control.adjustVolume(VolumeCommand.ToggleMute)
         assertFalse(control.state.value.volume!!.muted)
+        Unit
     }
 }

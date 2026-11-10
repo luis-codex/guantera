@@ -35,6 +35,9 @@
     <string name="er_new_due_early">El nuevo vencimiento debe ser posterior a la fecha del service.</string>
     <string name="er_category">Elegí una categoría.</string>
     <string name="er_amount">Cargá el monto del gasto.</string>
+    <string name="er_save_failed">No se pudo guardar. Probá de nuevo.</string>
+    <string name="er_save_full">Sin espacio en la radio. No se pudo guardar.</string>
+    <string name="er_car_moving">El auto se está moviendo. Detenelo para guardar.</string>
 
     <!-- P5 Mantenimiento -->
     <string name="mt_add">Agregar ítem</string>
@@ -99,15 +102,12 @@
 
     <!-- P8 Gastos y P9 -->
     <string name="ex_new">Nuevo</string>
-    <string name="ex_period_month">Este mes</string>
-    <string name="ex_period_year">12 meses</string>
-    <string name="ex_period_all">Todo</string>
     <string name="ex_cost_per_km">Costo por km</string>
     <string name="ex_total">Total</string>
     <string name="ex_km">Km del período</string>
     <string name="ex_too_few">Pocos km para calcular</string>
-    <string name="ex_empty">Sin gastos cargados.</string>
-    <string name="ex_empty_hint">Tocá Nuevo para cargar el primero.</string>
+    <string name="ex_empty_in">No hay gastos en %1$s.</string>
+    <string name="ex_empty_hint">Probá con otro período, o tocá Nuevo para cargar uno.</string>
     <string name="ex_notice_saved">Gasto guardado.</string>
     <string name="ex_notice_deleted">Gasto borrado.</string>
     <string name="ex_cat_fuel">Combustible</string>

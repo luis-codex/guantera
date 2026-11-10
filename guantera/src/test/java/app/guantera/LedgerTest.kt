@@ -2,8 +2,14 @@ package app.guantera
 
 import app.guantera.presentation.common.DisplayFormat
 import app.guantera.presentation.expenses.CostPerKm
+import app.guantera.presentation.maintenance.MaintenanceNotice
+import app.guantera.presentation.port.FormOutcome
 import app.guantera.presentation.expenses.ExpenseCategory
-import app.guantera.presentation.expenses.ExpensePeriod
+import app.guantera.presentation.history.HistoryBody
+import app.guantera.presentation.history.HistoryIcon
+import app.guantera.presentation.history.HistoryLayout
+import app.guantera.presentation.history.PeriodKind
+import app.guantera.presentation.history.RowText
 import app.guantera.presentation.expenses.ExpensesPage
 import app.guantera.presentation.expenses.ExpensesPresenter
 import app.guantera.presentation.input.CalendarDate
@@ -200,6 +206,7 @@ class LedgerPresentersTest {
     private val profile = MutableStateFlow(VehicleProfile("Auto", SampleMaintenanceData.ODOMETER_KM, "$"))
     private val status = MutableStateFlow(VehicleStatus(GpsStatus.Good, MotionStatus.Stopped))
     private val ticks = MutableStateFlow(0L)
+    private var confirmed = 0
 
     private fun test(block: suspend TestScope.() -> Unit) = runTest(UnconfinedTestDispatcher(), testBody = block)
 
@@ -211,7 +218,7 @@ class LedgerPresentersTest {
     )
 
     private fun TestScope.rig(): Rig {
-        val gate = FormGate(status, clock, backgroundScope)
+        val gate = FormGate(status, clock, backgroundScope) { confirmed += 1 }
         val expenseData = SampleExpenseData(clock)
         val maintenanceData = SampleMaintenanceData(clock, expenseData)
         val maintenance = MaintenancePresenter(maintenanceData, profile, gate, clock, format, ticks, backgroundScope, utc)
@@ -410,39 +417,75 @@ class LedgerPresentersTest {
 
     // ---- Expenses -------------------------------------------------------------------------
 
+    /** Rows of the timeline, newest first, whatever the day they belong to. */
+    private fun ExpensesPresenter.timelineRows() =
+        (overview().history.body as HistoryBody.Timeline).groups.flatMap { it.rows }
+
     @Test fun `cost per kilometer divides the period's spending by the period's km`() = test {
         val r = rig()
+        // The screen opens on the current month, up to today.
         val ui = r.expenses.overview()
-        val inPeriod = r.expenseData.expenses.value.filter { it.date > TODAY.plusMonths(-12) && it.date <= TODAY }
-        val km = r.expenseData.tripKilometers(TODAY.plusMonths(-12).plusDays(1), TODAY)
+        val from = CalendarDate(2026, 6, 1)
+        val inPeriod = r.expenseData.expenses.value.filter { it.date >= from && it.date <= TODAY }
+        val km = r.expenseData.costPerKm(from, TODAY).km
         val expected = inPeriod.sumOf { it.amountMinor } / 100.0 / km
         assertEquals(format.moneyExact(expected), (ui.costPerKm as CostPerKm.Value).text)
-        assertEquals(ExpensePeriod.TwelveMonths, ui.period)
+        assertEquals(PeriodKind.Month, ui.history.kind)
     }
 
     @Test fun `under 50 km the cost per kilometer is not calculated`() = test {
-        val r = rig()
         // Sample trips run 36 km a day, so the first day of a month has too little.
         val first = FakeClock(CalendarDate(2026, 6, 1).epochDay * 86_400_000L + 12 * 3_600_000L)
         val data = SampleExpenseData(first)
         val gate = FormGate(status, first, backgroundScope)
         val presenter = ExpensesPresenter(data, profile, gate, first, format, ticks, backgroundScope, utc)
         backgroundScope.launch { presenter.state.collect {} }
-        presenter.selectPeriod(ExpensePeriod.ThisMonth)
         assertEquals(CostPerKm.TooFewKm, presenter.overview().costPerKm)
-        presenter.selectPeriod(ExpensePeriod.All)
+        presenter.historyActions.selectKind(PeriodKind.Year)
         assertTrue(presenter.overview().costPerKm is CostPerKm.Value)
     }
 
-    @Test fun `the period selector narrows the list`() = test {
+    @Test fun `the figures and the list follow the period that is chosen`() = test {
         val r = rig()
-        r.expenses.selectPeriod(ExpensePeriod.All)
-        val all = r.expenses.overview()
-        r.expenses.selectPeriod(ExpensePeriod.ThisMonth)
         val month = r.expenses.overview()
-        assertTrue(month.rows.size <= 3)
-        assertTrue(all.pageCount > month.pageCount)
-        assertTrue(all.totalText != month.totalText)
+        r.expenses.historyActions.selectKind(PeriodKind.Year)
+        val year = r.expenses.overview()
+        assertTrue(year.totalText != month.totalText)
+        assertTrue(year.history.span.days > month.history.span.days)
+        // Going back one month changes both the figures and what the list holds.
+        r.expenses.historyActions.selectKind(PeriodKind.Month)
+        r.expenses.historyActions.previousPeriod()
+        val may = r.expenses.overview()
+        assertEquals(CalendarDate(2026, 5, 1), may.history.span.from)
+        assertTrue(r.expenses.timelineRows().isNotEmpty())
+        assertTrue(may.totalText != month.totalText)
+    }
+
+    @Test fun `a week has seven days and a range sums its months`() = test {
+        val r = rig()
+        r.expenses.historyActions.selectKind(PeriodKind.Week)
+        r.expenses.historyActions.selectLayout(HistoryLayout.Calendar)
+        val week = r.expenses.overview().history.body as HistoryBody.WeekStrip
+        assertEquals(7, week.cells.size)
+        assertEquals(CalendarDate(2026, 6, 15), week.cells.first().date) // Monday
+        assertTrue(week.cells.single { it.isToday }.date == TODAY)
+        r.expenses.historyActions.selectKind(PeriodKind.Range)
+        val range = r.expenses.overview()
+        assertEquals(3, (range.history.body as HistoryBody.MonthsGrid).cells.size)
+        val expected = r.expenseData.expensesBetween(CalendarDate(2026, 4, 1), TODAY).sumOf { it.amountMinor }
+        assertEquals(format.money(expected), range.totalText)
+    }
+
+    @Test fun `tapping a day opens its records and back returns to the calendar`() = test {
+        val r = rig()
+        r.expenses.historyActions.selectLayout(HistoryLayout.Calendar)
+        val withRecords = (r.expenses.overview().history.body as HistoryBody.MonthGrid).cells.filterNotNull().first { it.count > 0 }
+        r.expenses.historyActions.openDay(withRecords.date)
+        val open = r.expenses.overview().history.body as HistoryBody.OpenDay
+        assertEquals(withRecords.count, open.group.rows.size)
+        assertTrue(r.expenses.onBack())
+        assertTrue(r.expenses.overview().history.body is HistoryBody.MonthGrid)
+        assertFalse(r.expenses.onBack())
     }
 
     @Test fun `a new expense needs category and amount, then shows first in the list`() = test {
@@ -455,10 +498,12 @@ class LedgerPresentersTest {
         assertEquals(FormError.AmountRequired, (r.expenses.page() as ExpensesPage.Form).error)
         r.expenses.type("4500,5")
         r.expenses.save()
-        val row = r.expenses.overview().rows.first()
-        assertEquals(ExpenseCategory.Tolls, row.category)
-        assertEquals("4.500,50", row.amountText)
-        assertEquals("15/06/2026", row.dateText)
+        val group = (r.expenses.overview().history.body as HistoryBody.Timeline).groups.first()
+        val row = group.rows.first()
+        assertEquals(RowText.Category(ExpenseCategory.Tolls), row.title)
+        assertEquals(HistoryIcon.Tolls, row.icon)
+        assertEquals("4.500,50", row.valueText)
+        assertEquals(TODAY, group.date)
         assertEquals(TODAY, r.expenseData.expenses.value.last().date)
     }
 
@@ -490,8 +535,131 @@ class LedgerPresentersTest {
         val r = rig()
         r.expenseData.expenses.value.forEach { r.expenseData.delete(it.id) }
         val ui = r.expenses.overview()
-        assertTrue(ui.isEmpty)
-        assertEquals(1, ui.pageCount)
+        assertTrue(ui.history.isEmpty)
+        assertTrue((ui.history.body as HistoryBody.Timeline).groups.isEmpty())
         assertEquals("0", ui.totalText)
     }
+
+    // ---- Writes that the domain refuses ---------------------------------------------------
+
+    private fun ExpensesPresenter.fillAndSave() {
+        newExpense()
+        selectCategory(ExpenseCategory.Fuel)
+        type("1500")
+        save()
+    }
+
+    @Test fun `a form blocked by movement keeps what was typed and says the car moves`() = test {
+        val r = rig()
+        r.expenseData.outcome = FormOutcome.CarMoving
+        r.expenses.fillAndSave()
+        val form = r.expenses.page() as ExpensesPage.Form
+        assertEquals(FormError.CarMoving, form.error)
+        assertEquals("1.500", form.fields.first { it.field == FormField.Amount }.valueText)
+        assertEquals(0, r.expenseData.expenses.value.count { it.amountMinor == 150_000L && it.note == null && it.category == ExpenseCategory.Fuel && it.date == TODAY && it.id > 1000 })
+    }
+
+    @Test fun `a form blocked for lack of confirmation asks, and saves after yes`() = test {
+        val r = rig()
+        val before = r.expenseData.expenses.value.size
+        r.expenseData.outcome = FormOutcome.NeedsConfirmation
+        r.expenses.fillAndSave()
+        assertEquals(ConfirmKind.ParkedCheck, r.expenses.state.value.confirm?.kind)
+        assertTrue(r.expenses.page() is ExpensesPage.Form)
+        r.expenseData.outcome = FormOutcome.Saved
+        r.expenses.confirmYes()
+        assertEquals(1, confirmed)
+        assertTrue(r.expenses.page() is ExpensesPage.Overview)
+        assertEquals(before + 1, r.expenseData.expenses.value.size)
+    }
+
+    @Test fun `answering no to the parked question leaves the form open and unsaved`() = test {
+        val r = rig()
+        val before = r.expenseData.expenses.value.size
+        r.expenseData.outcome = FormOutcome.NeedsConfirmation
+        r.expenses.fillAndSave()
+        r.expenses.confirmNo()
+        assertEquals(null, r.expenses.state.value.confirm)
+        assertTrue(r.expenses.page() is ExpensesPage.Form)
+        assertEquals(before, r.expenseData.expenses.value.size)
+    }
+
+    @Test fun `a failed save keeps the form and its draft, and saving again retries`() = test {
+        val r = rig()
+        val before = r.expenseData.expenses.value.size
+        r.expenseData.outcome = FormOutcome.StorageFailed
+        r.expenses.fillAndSave()
+        assertEquals(FormError.SaveFailed, (r.expenses.page() as ExpensesPage.Form).error)
+        r.expenseData.outcome = FormOutcome.Saved
+        r.expenses.save()
+        assertTrue(r.expenses.page() is ExpensesPage.Overview)
+        assertEquals(before + 1, r.expenseData.expenses.value.size)
+    }
+
+    @Test fun `a full disk says so in the form`() = test {
+        val r = rig()
+        r.expenseData.outcome = FormOutcome.StorageFull
+        r.expenses.fillAndSave()
+        assertEquals(FormError.SaveFull, (r.expenses.page() as ExpensesPage.Form).error)
+    }
+
+    @Test fun `deleting an expense that the domain blocks keeps it`() = test {
+        val r = rig()
+        val first = r.expenseData.expenses.value.first()
+        r.expenses.openExpense(first.id)
+        r.expenses.askDelete()
+        r.expenseData.outcome = FormOutcome.NeedsConfirmation
+        r.expenses.confirmYes()
+        assertEquals(ConfirmKind.ParkedCheck, r.expenses.state.value.confirm?.kind)
+        assertTrue(r.expenseData.expenses.value.any { it.id == first.id })
+    }
+
+    @Test fun `maintenance forms report movement, confirmation and failures the same way`() = test {
+        val r = rig()
+        val oil = r.maintenanceData.items.value.first { it.name == "Aceite y filtro" }
+        r.maintenance.markDone(oil.id)
+        r.maintenanceData.outcome = FormOutcome.CarMoving
+        r.maintenance.save()
+        assertEquals(FormError.CarMoving, (r.maintenance.page() as MaintenancePage.ServiceForm).error)
+        r.maintenanceData.outcome = FormOutcome.StorageFailed
+        r.maintenance.save()
+        assertEquals(FormError.SaveFailed, (r.maintenance.page() as MaintenancePage.ServiceForm).error)
+        r.maintenanceData.outcome = FormOutcome.NeedsConfirmation
+        r.maintenance.save()
+        assertEquals(ConfirmKind.ParkedCheck, r.maintenance.state.value.confirm?.kind)
+        r.maintenanceData.outcome = FormOutcome.Saved
+        r.maintenance.confirmYes()
+        assertEquals(1, confirmed)
+        assertTrue(r.maintenance.page() is MaintenancePage.Overview)
+    }
+
+    @Test fun `restoring the catalog when the domain refuses says it failed and changes nothing`() = test {
+        val r = rig()
+        val before = r.maintenanceData.items.value.size
+        r.maintenanceData.outcome = FormOutcome.StorageFailed
+        r.maintenance.restoreCatalog()
+        assertEquals(MaintenanceNotice.SaveFailed, r.maintenance.overview().notice)
+        assertEquals(before, r.maintenanceData.items.value.size)
+    }
+
+    // ---- Cost per kilometer from the use case ---------------------------------------------
+
+    @Test fun `with enough km the cost per kilometer comes from the use case`() = test {
+        val r = rig()
+        val ui = r.expenses.overview()
+        val cost = r.expenseData.costPerKm(CalendarDate(2026, 6, 1), TODAY)
+        assertTrue(cost.minorPerKm != null)
+        assertEquals(format.moneyExact(cost.minorPerKm!! / 100.0), (ui.costPerKm as CostPerKm.Value).text)
+        assertEquals(format.money(cost.totalMinor), ui.totalText)
+        assertEquals(format.kilometers(cost.km), ui.kmText)
+    }
+
+    @Test fun `without enough km the screen says there are too few, never a made up figure`() = test {
+        val first = FakeClock(CalendarDate(2026, 6, 1).epochDay * 86_400_000L + 12 * 3_600_000L)
+        val data = SampleExpenseData(first)
+        val presenter = ExpensesPresenter(data, profile, FormGate(status, first, backgroundScope), first, format, ticks, backgroundScope, utc)
+        backgroundScope.launch { presenter.state.collect {} }
+        assertEquals(CostPerKm.TooFewKm, presenter.overview().costPerKm)
+    }
+
 }

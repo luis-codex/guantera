@@ -3,7 +3,6 @@
     <string name="app_name">Guantera</string>
 
     <!-- Barra superior -->
-    <string name="sample_data">Datos de ejemplo</string>
     <string name="gps_good">GPS con señal</string>
     <string name="gps_searching">Buscando GPS</string>
     <string name="gps_off">GPS apagado</string>
@@ -87,20 +86,22 @@
     <string name="notice_action_failed">Este equipo no permite abrir ese ajuste desde Guantera.</string>
 
     <!-- Música -->
-    <string name="music_question">¿Qué está sonando?</string>
-    <string name="music_app">App</string>
-    <string name="music_status">Estado</string>
-    <string name="music_nothing_title">No suena nada</string>
-    <string name="music_nothing_subtitle">Abrí tu app de música para empezar</string>
+    <string name="music_nothing_title">No hay música sonando</string>
+    <string name="music_nothing_subtitle">Los controles siguen disponibles</string>
     <string name="music_unknown_title">Música en reproducción</string>
     <string name="music_unknown_artist">Artista sin datos</string>
-    <string name="music_no_data">Sin datos</string>
     <string name="music_controls_active">Controles activos</string>
     <string name="music_open_to_see">Mirá Música para saber qué suena</string>
-    <string name="music_access_needed">Controles activos. Para ver qué suena, habilitá el acceso a notificaciones</string>
     <string name="music_access_action">Habilitar acceso</string>
-    <string name="music_command_failed">No se pudo enviar la orden. Abrí tu app de música y probá de nuevo.</string>
-    <string name="music_no_response">Sin respuesta</string>
+    <string name="music_no_response_to">La radio no respondió a %1$s</string>
+    <string name="control_play">Reproducir</string>
+    <string name="control_pause">Pausa</string>
+    <string name="control_play_pause">Reproducir y pausa</string>
+    <string name="control_previous">Anterior</string>
+    <string name="control_next">Siguiente</string>
+    <string name="control_volume_down">Bajar volumen</string>
+    <string name="control_volume_up">Subir volumen</string>
+    <string name="control_mute">Silenciar</string>
     <string name="status_playing">Sonando</string>
     <string name="status_paused">En pausa</string>
     <string name="status_stopped">Detenido</string>
@@ -118,7 +119,7 @@
     <string name="volume_unmute">Activar sonido</string>
     <string name="volume_percent">%1$d %%</string>
     <string name="volume_muted">Mudo</string>
-    <string name="volume_unknown">Sin datos</string>
+    <string name="volume_unknown">Desconocido</string>
 
     <!-- Conducción -->
     <string name="drive_km_label">Km del viaje</string>
@@ -127,11 +128,8 @@
     <string name="drive_no_alert">Sin avisos</string>
     <string name="drive_legend">Detené el auto para usar Guantera</string>
     <string name="drive_parked">Ya estacioné</string>
-    <string name="drive_end_simulation">Terminar simulación</string>
 
     <!-- Pantallas en preparación -->
-    <string name="pending_message">Esta pantalla todavía no está lista. Mientras tanto, volvé a Inicio.</string>
-    <string name="pending_action">Volver a Inicio</string>
     <string name="trips_question">¿Cuánto anduve?</string>
     <string name="maintenance_question">¿Qué toca hacer?</string>
     <string name="expenses_question">¿Cuánto me sale?</string>
@@ -194,12 +192,24 @@
     <string name="settings_import_title">Importar desde pendrive</string>
     <string name="settings_export_action">Exportar</string>
     <string name="settings_import_action">Importar</string>
-    <string name="settings_not_yet">Disponible cuando Guantera registre datos reales</string>
-    <string name="settings_music_title">Música</string>
-    <string name="settings_music_sample">De ejemplo</string>
-    <string name="settings_music_real">Real</string>
-    <string name="settings_music_sample_sub">De ejemplo: no suena nada de verdad.</string>
-    <string name="settings_music_real_sub">Real: controla lo que suena en la radio.</string>
+    <string name="settings_group_music">Controles de música</string>
+    <string name="settings_music_never">Sin probar</string>
+    <string name="settings_music_tried">%1$s · %2$s</string>
+    <string name="settings_music_tried_many">%1$s · %2$s (probó %3$d vías)</string>
+    <string name="route_transport">controles de la app de música</string>
+    <string name="route_key_play_pause">tecla Play/Pausa</string>
+    <string name="route_key_play">tecla Play</string>
+    <string name="route_key_pause">tecla Pausa</string>
+    <string name="route_key_headset">tecla de auricular</string>
+    <string name="route_key_next">tecla Siguiente</string>
+    <string name="route_key_previous">tecla Anterior</string>
+    <string name="route_stream_volume">volumen del sistema</string>
+    <string name="route_suggested_volume">volumen sugerido</string>
+    <string name="route_session_volume">volumen de la app</string>
+    <string name="route_key_volume">tecla de volumen</string>
+    <string name="effect_confirmed">respondió</string>
+    <string name="effect_none">sin efecto</string>
+    <string name="effect_unverifiable">enviada, no se puede comprobar</string>
     <string name="prompt_cancel">Cancelar</string>
     <string name="prompt_odometer_title">Corregir odómetro</string>
     <string name="prompt_odometer_message">Escribí los km que marca el tablero del auto.</string>
@@ -212,8 +222,6 @@
     <string name="prompt_stopped_message">No se sabe si el auto se mueve. Confirmá que está detenido para cambiar valores.</string>
     <string name="prompt_stopped_yes">Sí, está estacionado</string>
     <string name="prompt_stopped_no">No</string>
-    <string name="demo_section">Demostración</string>
-    <string name="demo_title">Modo conducción</string>
-    <string name="demo_subtitle">Muestra lo que ves mientras manejás, con datos de ejemplo.</string>
-    <string name="demo_action">Simular viaje</string>
+    <string name="notice_action_grant">Conceder</string>
+    <string name="prompt_stopped_message_retry">Hace falta confirmar que el auto está detenido para guardar.</string>
 </resources>

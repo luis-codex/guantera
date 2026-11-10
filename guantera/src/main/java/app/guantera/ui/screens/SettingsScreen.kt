@@ -1,64 +1,64 @@
 package app.guantera.ui.screens
 
 import android.content.Context
-import android.net.Uri
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import app.guantera.R
 import app.guantera.databinding.ScreenSettingsBinding
 import app.guantera.presentation.port.GpsStatus
 import app.guantera.presentation.settings.DateTimeUi
 import app.guantera.presentation.settings.OdometerResult
+import app.guantera.presentation.settings.SettingsDialog
 import app.guantera.presentation.settings.SettingsPresenter
 import app.guantera.presentation.settings.SettingsViewState
+import app.guantera.sonda.domain.media.ControlKind
 import app.guantera.ui.Screen
 import app.guantera.ui.openSystemSettings
 
-/** P11: the car, location, startup, saved data and the demonstration switches. */
+/** P11: the car, location, startup, saved data and media diagnostics. */
 class SettingsScreen(
     parent: ViewGroup,
     private val presenter: SettingsPresenter,
     private val onKeyboardClosed: () -> Unit,
+    private val onGrantLocation: () -> Unit,
 ) : Screen() {
     private val binding = ScreenSettingsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
     private val context = parent.context
     override val view = binding.root
     private var latest: SettingsViewState? = null
     private var onAccept: (() -> Boolean)? = null
-    private var gpsSettingsFailed = false
+    private var onCancel: (() -> Unit)? = null
+    /** True while the prompt shows what the presenter asked or reported, so that clearing it closes the prompt. */
+    private var promptFromPresenter = false
     private var dateSettingsFailed = false
 
     init {
         listOf(binding.rowOdometer, binding.rowCurrency, binding.rowGps, binding.rowTime, binding.rowBoot, binding.rowCatalog,
-            binding.rowExportAction, binding.rowImportAction, binding.demoRow).forEach { it.setSecondary() }
+            binding.rowExportAction, binding.rowImportAction).forEach { it.setSecondary() }
 
-        binding.rowOdometer.setOnAction { guarded(::askOdometer) }
-        binding.rowCurrency.setOnAction { guarded(presenter::nextCurrency) }
-        binding.rowGps.setOnAction { openAppSettings() }
+        binding.rowOdometer.setOnAction(::askOdometer)
+        binding.rowCurrency.setOnAction(presenter::nextCurrency)
+        binding.rowGps.setOnAction(::grantLocation)
         binding.rowTime.setOnAction { openDateSettings() }
-        binding.rowBoot.setOnAction { guarded(presenter::toggleOpenAtBoot) }
-        binding.rowCatalog.setOnAction { guarded(::askCatalog) }
-        binding.demoRow.setOnAction(presenter::simulateTrip)
-        binding.musicSample.setOnClickListener { presenter.setMusicReal(false) }
-        binding.musicReal.setOnClickListener { presenter.setMusicReal(true) }
+        binding.rowBoot.setOnAction(presenter::toggleOpenAtBoot)
+        binding.rowCatalog.setOnAction(::askCatalog)
+        binding.rowExportAction.setTexts(context.getString(R.string.settings_export_title), context.getString(R.string.settings_export_sub))
+        binding.rowExportAction.setAction(context.getString(R.string.settings_export_action))
+        binding.rowExportAction.setOnAction(presenter::export)
+        binding.rowImportAction.setTexts(context.getString(R.string.settings_import_title), context.getString(R.string.settings_import_sub))
+        binding.rowImportAction.setAction(context.getString(R.string.settings_import_action))
+        binding.rowImportAction.setOnAction(presenter::askImport)
 
-        binding.demoRow.setTexts(context.getString(R.string.demo_title), context.getString(R.string.demo_subtitle))
-        binding.demoRow.setAction(context.getString(R.string.demo_action))
-        binding.rowExportAction.setTexts(context.getString(R.string.settings_export_title), context.getString(R.string.settings_not_yet))
-        binding.rowExportAction.setActionDisabled(context.getString(R.string.settings_export_action))
-        binding.rowImportAction.setTexts(context.getString(R.string.settings_import_title), context.getString(R.string.settings_not_yet))
-        binding.rowImportAction.setActionDisabled(context.getString(R.string.settings_import_action))
-
-        binding.promptCancel.setOnClickListener { closePrompt() }
-        binding.promptAccept.setOnClickListener { if (onAccept?.invoke() == true) closePrompt() }
+        binding.promptCancel.setOnClickListener { onCancel?.invoke() ?: closePrompt() }
+        binding.promptAccept.setOnClickListener { if (onAccept?.invoke() == true && !promptFromPresenter) closePrompt() }
     }
 
     override suspend fun observe() {
         presenter.refreshDateTime() // may have changed in the system screen we just came back from
+        presenter.refreshBackupInfo()
         presenter.state.collect(::render)
     }
 
@@ -67,7 +67,8 @@ class SettingsScreen(
         binding.rowCar.setValue(state.carName)
         binding.rowOdometer.setTexts(
             context.getString(R.string.settings_odometer_title),
-            context.getString(R.string.settings_odometer_sub, state.odometerText, calibration(state.calibrationDays)),
+            state.odometerText?.let { context.getString(R.string.settings_odometer_sub, it, calibration(state.calibrationDays)) }
+                ?: context.getString(R.string.settings_odometer_none),
         )
         binding.rowOdometer.setAction(context.getString(R.string.settings_odometer_action))
         binding.rowCurrency.setTexts(
@@ -97,17 +98,20 @@ class SettingsScreen(
         binding.rowBackup.setValue(state.backupDays?.let(::age) ?: context.getString(R.string.settings_never))
         binding.rowExport.setValue(state.exportDays?.let(::age) ?: context.getString(R.string.settings_never))
 
-        binding.demoSection.isVisible = state.showDemo
-        binding.musicSample.setSelectedLook(!state.musicReal)
-        binding.musicReal.setSelectedLook(state.musicReal)
-        binding.musicSubtitle.setText(if (state.musicReal) R.string.settings_music_real_sub else R.string.settings_music_sample_sub)
+        renderMusicControls(state)
+        renderDialog(state.dialog)
     }
 
-    private fun android.widget.Button.setSelectedLook(selected: Boolean) {
-        setBackgroundResource(if (selected) R.drawable.bg_button_primary else R.drawable.bg_button_secondary)
-        setTextColor(ContextCompat.getColor(context, if (selected) R.color.background else R.color.ink))
-        isSelected = selected
-        contentDescription = if (selected) context.getString(R.string.nav_current, text) else text
+    private fun renderMusicControls(state: SettingsViewState) {
+        val rows = mapOf(
+            ControlKind.PlayPause to binding.musicRowPlay,
+            ControlKind.Previous to binding.musicRowPrevious,
+            ControlKind.Next to binding.musicRowNext,
+            ControlKind.VolumeDown to binding.musicRowVolDown,
+            ControlKind.VolumeUp to binding.musicRowVolUp,
+            ControlKind.Mute to binding.musicRowMute,
+        )
+        state.musicControls.forEach { rows[it.control]?.setValue(context.diagnosticText(it)) }
     }
 
     private fun calibration(days: Int?): String = when (days) {
@@ -164,31 +168,13 @@ class SettingsScreen(
         }
     }
 
-    private fun openAppSettings() {
-        val opened = context.openSystemSettings(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}"))
-        if (!opened) {
-            gpsSettingsFailed = true
-            binding.rowGps.setTexts(context.getString(R.string.settings_gps_title), context.getString(R.string.settings_gps_open_failed))
-        }
-    }
-
-    /** Spec section 5: with the car's movement unknown, any change first asks if it is parked. */
-    private fun guarded(action: () -> Unit) {
-        if (!presenter.requiresStoppedConfirmation()) return action()
-        openPrompt(
-            R.string.prompt_stopped_title, R.string.prompt_stopped_message,
-            R.string.prompt_stopped_no, R.string.prompt_stopped_yes, withInput = false,
-        ) {
-            presenter.confirmStopped()
-            action()
-            true
-        }
-    }
+    /** The row only offers the permission while it is missing; the platform dialog or, if refused for good, the app's page. */
+    private fun grantLocation() = onGrantLocation()
 
     private fun askOdometer() {
         openPrompt(
-            R.string.prompt_odometer_title, R.string.prompt_odometer_message,
-            R.string.prompt_cancel, R.string.prompt_odometer_save, withInput = true,
+            text(R.string.prompt_odometer_title), text(R.string.prompt_odometer_message),
+            text(R.string.prompt_cancel), text(R.string.prompt_odometer_save), withInput = true,
         ) {
             when (presenter.correctOdometer(binding.promptInput.text.toString())) {
                 OdometerResult.Saved -> true
@@ -199,30 +185,85 @@ class SettingsScreen(
                 }
             }
         }
-        latest?.let { binding.promptInput.setText(it.odometerText.replace(".", "")) }
+        latest?.odometerText?.let { binding.promptInput.setText(it.replace(".", "")) }
         binding.promptInput.selectAll()
     }
 
     private fun askCatalog() {
         openPrompt(
-            R.string.prompt_catalog_title, R.string.prompt_catalog_message,
-            R.string.prompt_cancel, R.string.prompt_catalog_accept, withInput = false,
+            text(R.string.prompt_catalog_title), text(R.string.prompt_catalog_message),
+            text(R.string.prompt_cancel), text(R.string.prompt_catalog_accept), withInput = false,
         ) {
             presenter.restoreCatalog()
             true
         }
     }
 
-    private fun openPrompt(title: Int, message: Int, cancel: Int, accept: Int, withInput: Boolean, onAccept: () -> Boolean) {
+    /** What the presenter asks or reports takes over the prompt; once it clears, the prompt goes away. */
+    private fun renderDialog(dialog: SettingsDialog?) {
+        if (dialog == null) {
+            if (promptFromPresenter) { promptFromPresenter = false; closePrompt() }
+            return
+        }
+        val info = { presenter.dismissDialog(); true }
+        when (dialog) {
+            SettingsDialog.AskStopped -> fromPresenter(
+                text(R.string.prompt_stopped_title), text(R.string.prompt_stopped_message_retry),
+                text(R.string.prompt_stopped_no), text(R.string.prompt_stopped_yes),
+                onCancel = { presenter.answerStopped(false) },
+            ) { presenter.answerStopped(true); true }
+            is SettingsDialog.SaveFailed -> fromPresenter(
+                text(if (dialog.diskFull) R.string.settings_save_failed_full else R.string.er_save_failed), null,
+                text(R.string.rp_close), text(R.string.rp_retry),
+                onCancel = presenter::dismissDialog,
+            ) { presenter.retryWrite(); true }
+            SettingsDialog.ConfirmImport -> fromPresenter(
+                text(R.string.rp_confirm_import_title), text(R.string.rp_confirm_import_message),
+                text(R.string.prompt_cancel), text(R.string.rp_confirm_import_yes),
+                onCancel = presenter::dismissDialog,
+            ) { presenter.importNewest(); true }
+            SettingsDialog.Working -> fromPresenter(text(R.string.rp_working), null, null, text(R.string.rp_working), onCancel = null) { false }
+                .also { binding.promptAccept.isEnabled = false }
+            is SettingsDialog.ExportReport -> fromPresenter(
+                text(R.string.rp_export_title), context.exportText(dialog.outcome), null, text(R.string.rp_ok), onCancel = null, accept = info,
+            )
+            is SettingsDialog.ImportReport -> fromPresenter(
+                text(R.string.rp_import_title), context.importText(dialog.outcome), null, text(R.string.rp_ok), onCancel = null, accept = info,
+            )
+            SettingsDialog.CarMoving -> fromPresenter(
+                text(R.string.rp_car_moving), null, null, text(R.string.rp_ok), onCancel = null, accept = info,
+            )
+        }
+    }
+
+    private fun fromPresenter(
+        title: CharSequence, message: CharSequence?, cancel: CharSequence?, acceptText: CharSequence,
+        onCancel: (() -> Unit)?, accept: () -> Boolean,
+    ) {
+        promptFromPresenter = true
+        openPrompt(title, message, cancel, acceptText, withInput = false, onCancel = onCancel, onAccept = accept)
+        binding.promptAccept.isEnabled = true
+    }
+
+    private fun text(id: Int): CharSequence = context.getString(id)
+
+    private fun openPrompt(
+        title: CharSequence, message: CharSequence?, cancel: CharSequence?, accept: CharSequence, withInput: Boolean,
+        onCancel: (() -> Unit)? = null, onAccept: () -> Boolean,
+    ) {
         this.onAccept = onAccept
-        binding.promptTitle.setText(title)
-        binding.promptMessage.setText(message)
-        binding.promptCancel.setText(cancel)
-        binding.promptAccept.setText(accept)
+        this.onCancel = onCancel
+        binding.promptTitle.text = title
+        binding.promptMessage.isVisible = message != null
+        binding.promptMessage.text = message
+        binding.promptCancel.isVisible = cancel != null
+        binding.promptCancel.text = cancel
+        binding.promptAccept.text = accept
         binding.promptError.isVisible = false
+        val wasVisible = binding.prompt.isVisible && binding.promptInput.isVisible
         binding.promptInput.isVisible = withInput
         binding.prompt.isVisible = true
-        if (withInput) {
+        if (withInput && !wasVisible) {
             binding.promptInput.requestFocus()
             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
                 ?.showSoftInput(binding.promptInput, InputMethodManager.SHOW_IMPLICIT)
@@ -234,6 +275,7 @@ class SettingsScreen(
             ?.hideSoftInputFromWindow(binding.promptInput.windowToken, 0)
         binding.prompt.isVisible = false
         onAccept = null
+        onCancel = null
         onKeyboardClosed() // closing the keyboard clears the hide flags of the system bars
     }
 }

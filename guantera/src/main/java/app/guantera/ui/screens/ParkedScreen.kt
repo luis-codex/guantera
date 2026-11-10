@@ -81,6 +81,7 @@ class ParkedScreen(
         when (error) {
             ParkedError.NoFix -> binding.error.setText(R.string.parked_no_fix)
             ParkedError.Moving -> binding.error.setText(R.string.parked_moving)
+            ParkedError.SaveFailed -> binding.error.setText(R.string.er_save_failed)
             null -> Unit
         }
     }

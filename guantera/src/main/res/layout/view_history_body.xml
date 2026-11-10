@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <app.guantera.ui.history.NavRowView
+        android:id="@+id/navRow"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min" />
+    <LinearLayout
+        android:id="@+id/rangeBlock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <app.guantera.ui.history.NavRowView
+            android:id="@+id/rangeFromRow"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/touch_min" />
+        <app.guantera.ui.history.NavRowView
+            android:id="@+id/rangeToRow"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginTop="@dimen/s8" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/backToCalendar"
+        style="@style/Control.Button.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/touch_min"
+        android:text="@string/hs_back_to_calendar"
+        android:visibility="gone" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/row_gap"
+        android:layout_weight="1">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:overScrollMode="never"
+            android:scrollbarSize="@dimen/s4"
+            android:scrollbarThumbVertical="@color/line_strong"
+            android:scrollbars="vertical" />
+        <LinearLayout
+            android:id="@+id/grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" />
+        <ScrollView
+            android:id="@+id/gridScroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:overScrollMode="never"
+            android:scrollbarSize="@dimen/s4"
+            android:scrollbarThumbVertical="@color/line_strong"
+            android:scrollbars="vertical">
+            <LinearLayout
+                android:id="@+id/gridScrolled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+        <LinearLayout
+            android:id="@+id/emptyBlock"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/s24"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/emptyText"
+                style="@style/Text.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/emptyHint"
+                style="@style/Text.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/inner_gap" />
+        </LinearLayout>
+    </FrameLayout>
+</merge>

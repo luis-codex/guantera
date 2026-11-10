@@ -129,6 +129,8 @@ class MaintenanceScreen(
         MaintenanceNotice.ItemDeleted -> context.getString(R.string.mt_notice_item_deleted)
         MaintenanceNotice.CatalogRestored -> context.resources.getQuantityString(R.plurals.mt_notice_catalog_restored, restored, restored)
         MaintenanceNotice.CatalogComplete -> context.getString(R.string.mt_notice_catalog_complete)
+        MaintenanceNotice.SaveFailed -> context.getString(R.string.er_save_failed)
+        MaintenanceNotice.CarMoving -> context.getString(R.string.er_car_moving)
     }
 
     private fun detailText(row: MaintenanceRowUi): CharSequence {

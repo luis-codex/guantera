@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+        <app.guantera.ui.components.ChoiceButton
+            android:id="@+id/kindWeek"
+            style="@style/Control.Button.Choice"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_min"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/s4"
+            android:paddingEnd="@dimen/s4"
+            android:text="@string/hs_week" />
+        <app.guantera.ui.components.ChoiceButton
+            android:id="@+id/kindMonth"
+            style="@style/Control.Button.Choice"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="@dimen/s8"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/s4"
+            android:paddingEnd="@dimen/s4"
+            android:text="@string/hs_month" />
+        <app.guantera.ui.components.ChoiceButton
+            android:id="@+id/kindYear"
+            style="@style/Control.Button.Choice"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="@dimen/s8"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/s4"
+            android:paddingEnd="@dimen/s4"
+            android:text="@string/hs_year" />
+        <app.guantera.ui.components.ChoiceButton
+            android:id="@+id/kindRange"
+            style="@style/Control.Button.Choice"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="@dimen/s8"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:paddingStart="@dimen/s4"
+            android:paddingEnd="@dimen/s4"
+            android:text="@string/hs_range" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/s8"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+        <app.guantera.ui.components.ChoiceButton
+            android:id="@+id/layoutList"
+            style="@style/Control.Button.Choice"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_min"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/ic_l_list"
+            android:drawableTint="@color/ink"
+            android:drawablePadding="@dimen/icon_gap_inline"
+            android:minWidth="0dp"
+            android:text="@string/hs_list" />
+        <app.guantera.ui.components.ChoiceButton
+            android:id="@+id/layoutCalendar"
+            style="@style/Control.Button.Choice"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_min"
+            android:layout_marginStart="@dimen/s8"
+            android:layout_weight="1.4"
+            android:drawableStart="@drawable/ic_l_calendar"
+            android:drawableTint="@color/ink"
+            android:drawablePadding="@dimen/icon_gap_inline"
+            android:minWidth="0dp"
+            android:text="@string/hs_calendar" />
+    </LinearLayout>
+</merge>

@@ -1,6 +1,7 @@
 package app.guantera.presentation.parked
 
 import app.guantera.presentation.common.DisplayFormat
+import app.guantera.presentation.port.FormOutcome
 import app.guantera.presentation.port.GuanteraData
 import app.guantera.presentation.port.MotionStatus
 import app.guantera.presentation.port.ParkingDetail
@@ -28,7 +29,7 @@ sealed interface ParkedContent {
     ) : ParkedContent
 }
 
-enum class ParkedError { NoFix, Moving }
+enum class ParkedError { NoFix, Moving, SaveFailed }
 
 /** What the user is doing on the screen. Kept here so driving mode can interrupt it and return. */
 private data class Interaction(
@@ -38,7 +39,7 @@ private data class Interaction(
     val pending: Pending? = null,
 )
 
-private enum class Pending { SaveHere, EditNote }
+private enum class Pending { SaveHere, EditNote, SaveNote }
 
 data class ParkedViewState(
     val content: ParkedContent,
@@ -54,7 +55,7 @@ class ParkedPresenter(
     private val format: DisplayFormat,
     private val clock: Clock,
     ticks: Flow<Long>,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
 ) {
     private val interaction = MutableStateFlow(Interaction())
     private var confirmedUntil = 0L
@@ -79,6 +80,7 @@ class ParkedPresenter(
     fun editNote() = whenStopped(Pending.EditNote)
 
     fun confirmStopped() {
+        data.confirmStopped()
         confirmedUntil = clock.elapsedRealtimeMillis() + CONFIRMATION_MILLIS
         val pending = interaction.value.pending ?: return
         interaction.value = interaction.value.copy(pending = null)
@@ -92,8 +94,16 @@ class ParkedPresenter(
     }
 
     fun saveNote() {
-        data.saveSpotNote(interaction.value.draft)
-        interaction.value = Interaction()
+        val draft = interaction.value.draft
+        scope.launch {
+            when (data.saveSpotNote(draft)) {
+                FormOutcome.Saved -> interaction.value = Interaction()
+                FormOutcome.NeedsConfirmation -> interaction.value = interaction.value.copy(pending = Pending.SaveNote, error = null)
+                FormOutcome.CarMoving -> interaction.value = interaction.value.copy(error = ParkedError.Moving)
+                FormOutcome.Rejected, FormOutcome.StorageFull, FormOutcome.StorageFailed ->
+                    interaction.value = interaction.value.copy(error = ParkedError.SaveFailed)
+            }
+        }
     }
 
     /** Returns true if a note was being edited, so that the back key only cancels the edit. */
@@ -116,18 +126,22 @@ class ParkedPresenter(
 
     private fun run(action: Pending) = when (action) {
         Pending.SaveHere -> saveSpot()
+        Pending.SaveNote -> saveNote()
         Pending.EditNote -> {
             interaction.value = Interaction(editing = true, draft = data.parkingSpot.value?.note.orEmpty())
         }
     }
 
     private fun saveSpot() {
-        val error = when (data.saveSpotHere()) {
-            SaveSpotResult.Saved -> null
-            SaveSpotResult.NoValidFix -> ParkedError.NoFix
-            SaveSpotResult.CarMoving -> ParkedError.Moving
+        scope.launch {
+            when (data.saveSpotHere()) {
+                SaveSpotResult.Saved -> interaction.value = Interaction()
+                SaveSpotResult.NoValidFix -> interaction.value = Interaction(error = ParkedError.NoFix)
+                SaveSpotResult.CarMoving -> interaction.value = Interaction(error = ParkedError.Moving)
+                SaveSpotResult.Failed -> interaction.value = Interaction(error = ParkedError.SaveFailed)
+                SaveSpotResult.NeedsConfirmation -> interaction.value = Interaction(pending = Pending.SaveHere)
+            }
         }
-        interaction.value = Interaction(error = error)
     }
 
     private fun reduce(spot: ParkingDetail?, now: Long, current: Interaction) = ParkedViewState(

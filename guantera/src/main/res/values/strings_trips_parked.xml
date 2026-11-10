@@ -4,16 +4,14 @@
     <string name="duration_hours">%1$d h %2$02d</string>
 
     <!-- P3 Viajes -->
-    <string name="trips_today">Hoy</string>
-    <string name="trips_week">Esta semana</string>
-    <string name="trips_month">Este mes</string>
-    <string name="trips_empty">Todavía no hay viajes. Se registran solos cuando el auto se mueve.</string>
+    <string name="trips_period_km">Km del período</string>
+    <string name="trips_period_count">Viajes</string>
+    <string name="trips_empty_in">No hay viajes en %1$s.</string>
+    <string name="trips_empty_hint">Se registran solos cuando el auto se mueve.</string>
     <string name="trips_estimated">Cierre estimado</string>
     <string name="trips_day_today">Hoy</string>
     <string name="trips_day_yesterday">Ayer</string>
     <string name="trips_km">%1$s km</string>
-    <string name="trips_see">Ver ›</string>
-    <string name="trips_row_description">Viaje, %1$s, %2$s, %3$s kilómetros</string>
 
     <!-- P4 Detalle de viaje -->
     <string name="trip_question">¿Cómo fue este viaje?</string>

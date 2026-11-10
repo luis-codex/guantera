@@ -10,11 +10,12 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState as AndroidPlaybackState
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.view.KeyEvent
-import app.guantera.sonda.domain.media.MediaCommand
+import app.guantera.sonda.domain.media.ControlRoute
 import app.guantera.sonda.domain.media.NowPlaying
 import app.guantera.sonda.domain.media.PlaybackState
 import app.guantera.sonda.domain.media.VolumeCommand
@@ -45,6 +46,22 @@ internal class ControllerHandle(private val context: Context, private val c: Med
         null -> PlaybackState.Unknown
         else -> PlaybackState.Unknown
     }
+
+    override fun signature(): String? {
+        val ps = c.playbackState ?: return null
+        val m = c.metadata
+        return listOf(m?.getString(MediaMetadata.METADATA_KEY_TITLE), m?.getString(MediaMetadata.METADATA_KEY_ARTIST),
+            ps.state, ps.position, ps.lastPositionUpdateTime).joinToString("|")
+    }
+
+    override fun adjustVolume(command: VolumeCommand) = c.adjustVolume(
+        when (command) {
+            VolumeCommand.Up -> AudioManager.ADJUST_RAISE
+            VolumeCommand.Down -> AudioManager.ADJUST_LOWER
+            VolumeCommand.ToggleMute -> AudioManager.ADJUST_TOGGLE_MUTE
+        },
+        0,
+    )
 
     override fun play() = c.transportControls.play()
     override fun pause() = c.transportControls.pause()
@@ -118,20 +135,50 @@ internal class AndroidSessionSource(private val context: Context) : SessionSourc
     }
 }
 
+private fun AudioManager.pressKey(code: Int) {
+    val t = SystemClock.uptimeMillis()
+    dispatchMediaKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0))
+    dispatchMediaKeyEvent(KeyEvent(t, SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, code, 0))
+}
+
 internal class AudioKeyDispatcher(context: Context) : KeyDispatcher {
     private val audio = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
 
-    override fun dispatch(command: MediaCommand): Boolean {
+    override fun dispatch(route: ControlRoute): Boolean {
         val am = audio ?: return false
-        val code = when (command) {
-            MediaCommand.PlayPause -> KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
-            MediaCommand.Next -> KeyEvent.KEYCODE_MEDIA_NEXT
-            MediaCommand.Previous -> KeyEvent.KEYCODE_MEDIA_PREVIOUS
-        }
-        val t = SystemClock.uptimeMillis()
-        am.dispatchMediaKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0))
-        am.dispatchMediaKeyEvent(KeyEvent(t, SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, code, 0))
+        am.pressKey(
+            when (route) {
+                ControlRoute.KeyPlayPause -> KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+                ControlRoute.KeyPlay -> KeyEvent.KEYCODE_MEDIA_PLAY
+                ControlRoute.KeyPause -> KeyEvent.KEYCODE_MEDIA_PAUSE
+                ControlRoute.KeyHeadsetHook -> KeyEvent.KEYCODE_HEADSETHOOK
+                ControlRoute.KeyNext -> KeyEvent.KEYCODE_MEDIA_NEXT
+                ControlRoute.KeyPrevious -> KeyEvent.KEYCODE_MEDIA_PREVIOUS
+                else -> throw IllegalArgumentException("not a media key route: $route")
+            },
+        )
         return true
+    }
+}
+
+internal class AudioActivityProbe(private val context: Context) : AudioActivity {
+    private val audio = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+    private var callback: Any? = null
+
+    override fun isMusicActive(): Boolean = audio?.isMusicActive == true
+
+    override fun start(onChange: () -> Unit) {
+        if (Build.VERSION.SDK_INT < 26 || callback != null) return
+        val cb = object : AudioManager.AudioPlaybackCallback() {
+            override fun onPlaybackConfigChanged(configs: MutableList<android.media.AudioPlaybackConfiguration>?) { onChange() }
+        }
+        audio?.registerAudioPlaybackCallback(cb, Handler(Looper.getMainLooper()))
+        callback = cb
+    }
+
+    override fun stop() {
+        if (Build.VERSION.SDK_INT >= 26) (callback as? AudioManager.AudioPlaybackCallback)?.let { audio?.unregisterAudioPlaybackCallback(it) }
+        callback = null
     }
 }
 
@@ -148,14 +195,25 @@ internal class AudioVolumeBackend(private val context: Context) : VolumeBackend 
         )
     }
 
-    override fun adjust(command: VolumeCommand) {
+    override fun adjust(route: ControlRoute, command: VolumeCommand) {
         val am = audio ?: throw UnsupportedOperationException("no AudioManager")
         val dir = when (command) {
             VolumeCommand.Up -> AudioManager.ADJUST_RAISE
             VolumeCommand.Down -> AudioManager.ADJUST_LOWER
             VolumeCommand.ToggleMute -> AudioManager.ADJUST_TOGGLE_MUTE
         }
-        am.adjustStreamVolume(AudioManager.STREAM_MUSIC, dir, 0)
+        when (route) {
+            ControlRoute.StreamVolume -> am.adjustStreamVolume(AudioManager.STREAM_MUSIC, dir, 0)
+            ControlRoute.SuggestedVolume -> am.adjustSuggestedStreamVolume(dir, AudioManager.STREAM_MUSIC, 0)
+            ControlRoute.KeyVolume -> am.pressKey(
+                when (command) {
+                    VolumeCommand.Up -> KeyEvent.KEYCODE_VOLUME_UP
+                    VolumeCommand.Down -> KeyEvent.KEYCODE_VOLUME_DOWN
+                    VolumeCommand.ToggleMute -> KeyEvent.KEYCODE_VOLUME_MUTE
+                },
+            )
+            else -> throw IllegalArgumentException("not a volume route: $route")
+        }
     }
 
     override fun start(onChange: () -> Unit) {
